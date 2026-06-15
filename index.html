@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>動物學校 — 1 年級互動學習</title>
+<style>
+  :root {
+    --bg: #FFF8E7; --yellow: #FFD93D; --orange: #FF8C42; --pink: #FF6B9D;
+    --red: #FF6B6B; --teal: #4ECDC4; --mint: #95E1D3; --purple: #C9B1FF;
+    --sky: #74C0FC; --grass: #8CE99A; --brown: #8B5A2B; --dark: #2D3436;
+    --shadow: 0 6px 0 rgba(0,0,0,0.15); --shadow-lg: 0 10px 0 rgba(0,0,0,0.15);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; font-family: "Comic Sans MS", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif; background: linear-gradient(180deg, #FFF8E7 0%, #FFE8B0 100%); color: var(--dark); overflow-x: hidden; }
+  body { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+  .clouds { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .cloud { position: absolute; font-size: 60px; opacity: 0.6; animation: floatCloud 30s linear infinite; }
+  .cloud:nth-child(1) { top: 10%; left: -10%; animation-duration: 40s; }
+  .cloud:nth-child(2) { top: 25%; left: -10%; animation-duration: 55s; animation-delay: -10s; font-size: 80px; }
+  .cloud:nth-child(3) { top: 50%; left: -10%; animation-duration: 45s; animation-delay: -20s; font-size: 50px; }
+  @keyframes floatCloud { 0%{transform:translateX(-100px);} 100%{transform:translateX(calc(100vw + 100px));} }
+  .app { width: 100%; max-width: 960px; position: relative; z-index: 1; }
+  .header { text-align: center; padding: 20px 0; }
+  .header h1 { font-size: clamp(28px, 5vw, 48px); color: var(--red); text-shadow: 3px 3px 0 #fff, 6px 6px 0 rgba(0,0,0,0.1); letter-spacing: 2px; }
+  .header .sub { color: var(--brown); margin-top: 8px; font-size: 18px; }
+  .btn { background: var(--yellow); color: var(--dark); border: 4px solid var(--dark); border-radius: 20px; padding: 14px 28px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: var(--shadow); transition: all 0.15s; font-family: inherit; }
+  .btn:hover { transform: translateY(2px); box-shadow: 0 4px 0 rgba(0,0,0,0.15); }
+  .btn:active { transform: translateY(6px); box-shadow: 0 0 0 rgba(0,0,0,0.15); }
+  .btn.primary { background: var(--teal); color: #fff; }
+  .btn.pink { background: var(--pink); color: #fff; }
+  .btn.small { padding: 8px 16px; font-size: 16px; border-width: 3px; }
+
+  /* 年級首頁 */
+  .grade-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin-top: 32px; }
+  .grade-card { background: #fff; border: 5px solid var(--dark); border-radius: 30px; padding: 28px 16px; text-align: center; cursor: pointer; box-shadow: var(--shadow-lg); transition: all 0.2s; position: relative; }
+  .grade-card:not(.locked):hover { transform: translateY(-6px) rotate(-2deg); }
+  .grade-card.g1 { background: linear-gradient(135deg, #FFF3CD 0%, #FFE082 100%); }
+  .grade-card.g2 { background: linear-gradient(135deg, #E1F5FE 0%, #B3E5FC 100%); }
+  .grade-card.g3 { background: linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%); }
+  .grade-card.locked { opacity: 0.6; cursor: not-allowed; }
+  .grade-card .grade-emoji { font-size: 80px; display: block; margin-bottom: 8px; }
+  .grade-card h2 { font-size: 30px; margin-bottom: 8px; color: var(--dark); }
+  .grade-card p { color: var(--brown); font-size: 15px; line-height: 1.5; }
+  .grade-badge { display: inline-block; margin-top: 12px; padding: 4px 14px; border-radius: 14px; font-size: 14px; font-weight: bold; border: 2px solid var(--dark); }
+  .grade-badge.ready { background: var(--grass); color: var(--dark); }
+  .grade-badge.soon { background: #ccc; color: var(--brown); }
+
+  /* 科目卡 */
+  .subject-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 32px; }
+  @media (max-width: 600px) { .subject-grid { grid-template-columns: 1fr; } }
+  .subject-card { background: #fff; border: 5px solid var(--dark); border-radius: 30px; padding: 30px 20px; text-align: center; cursor: pointer; box-shadow: var(--shadow-lg); transition: all 0.2s; position: relative; overflow: hidden; }
+  .subject-card:hover { transform: translateY(-5px) rotate(-1deg); }
+  .subject-card.math { background: linear-gradient(135deg, #FFF3CD 0%, #FFE8A1 100%); }
+  .subject-card.chinese { background: linear-gradient(135deg, #FFE0EC 0%, #FFB6C1 100%); }
+  .subject-card.science { background: linear-gradient(135deg, #E8F5E9 0%, #A5D6A7 100%); }
+  .subject-card .animal { font-size: 90px; display: block; margin-bottom: 10px; }
+  .subject-card h2 { font-size: 32px; color: var(--dark); margin-bottom: 8px; }
+  .subject-card p { color: var(--brown); font-size: 16px; line-height: 1.5; }
+
+  /* 關卡 */
+  .levels-page, .game-page { display: none; }
+  .back-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 0 20px; gap: 8px; flex-wrap: wrap; }
+  .chapter-title { font-size: 24px; color: var(--red); text-shadow: 2px 2px 0 #fff; }
+  .star-display { background: #fff; border: 3px solid var(--dark); border-radius: 20px; padding: 6px 16px; font-size: 18px; box-shadow: var(--shadow); }
+  .levels-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; margin-top: 20px; }
+  .level-card { background: #fff; border: 4px solid var(--dark); border-radius: 25px; padding: 20px 12px; text-align: center; cursor: pointer; box-shadow: var(--shadow); transition: all 0.2s; position: relative; }
+  .level-card:hover { transform: scale(1.05); }
+  .level-card .num { display: inline-block; background: var(--teal); color: #fff; width: 46px; height: 46px; line-height: 38px; border-radius: 50%; border: 4px solid var(--dark); font-size: 20px; font-weight: bold; margin-bottom: 10px; }
+  .level-card h3 { font-size: 18px; margin-bottom: 6px; }
+  .level-card .desc { font-size: 13px; color: var(--brown); min-height: 32px; }
+  .level-card .stars { margin-top: 10px; font-size: 20px; letter-spacing: 3px; }
+  .level-card.locked { opacity: 0.5; cursor: not-allowed; background: #ddd; }
+  .level-card.locked::after { content: "🔒"; position: absolute; top: 8px; right: 8px; font-size: 22px; }
+
+  /* 遊戲畫面 */
+  .game-stage { background: #fff; border: 5px solid var(--dark); border-radius: 30px; padding: 24px 18px; margin-top: 12px; min-height: 460px; box-shadow: var(--shadow-lg); }
+  .game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 8px; font-size: 16px; }
+  .progress-bar { flex: 1; height: 20px; background: #eee; border: 3px solid var(--dark); border-radius: 20px; overflow: hidden; margin: 0 10px; min-width: 100px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--grass)); width: 0%; transition: width 0.4s; }
+  .score-badge { background: var(--yellow); border: 3px solid var(--dark); border-radius: 16px; padding: 4px 12px; font-weight: bold; font-size: 16px; }
+  .question { text-align: center; margin-bottom: 20px; }
+  .question .prompt { font-size: 20px; margin-bottom: 12px; color: var(--dark); line-height: 1.6; }
+  .speak-btn { background: var(--sky); color: #fff; border: 3px solid var(--dark); border-radius: 50%; width: 50px; height: 50px; font-size: 22px; cursor: pointer; box-shadow: var(--shadow); margin: 4px; vertical-align: middle; }
+  .speak-btn:active { transform: translateY(4px); box-shadow: none; }
+  .big-display { font-size: 90px; font-weight: bold; text-align: center; color: var(--red); text-shadow: 4px 4px 0 #FFD93D; margin: 16px 0; line-height: 1; }
+  .bopomofo-display { font-size: 100px; font-weight: bold; text-align: center; color: var(--pink); text-shadow: 4px 4px 0 var(--yellow); margin: 16px 0; line-height: 1; font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; }
+  .options { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; margin-top: 18px; }
+  .option-btn { background: #fff; border: 4px solid var(--dark); border-radius: 20px; padding: 20px 10px; font-size: 28px; font-weight: bold; cursor: pointer; box-shadow: var(--shadow); transition: all 0.15s; font-family: inherit; color: var(--dark); }
+  .option-btn:hover { transform: translateY(-3px); }
+  .option-btn:active { transform: translateY(3px); box-shadow: none; }
+  .option-btn.correct { background: var(--grass); animation: bounce 0.5s; }
+  .option-btn.wrong { background: var(--red); color: #fff; animation: shake 0.4s; }
+  .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+  @keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-15px) scale(1.1);} }
+  @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-10px);} 75%{transform:translateX(10px);} }
+  .counting-area { background: linear-gradient(180deg, #E0F7FA 0%, #B2EBF2 100%); border: 4px dashed var(--teal); border-radius: 20px; padding: 24px 16px; min-height: 160px; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .counting-area .item { font-size: 44px; animation: pop 0.3s; }
+  @keyframes pop { 0%{transform:scale(0);} 80%{transform:scale(1.2);} 100%{transform:scale(1);} }
+  .match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 16px; }
+  .match-col { display: flex; flex-direction: column; gap: 10px; }
+  .match-item { background: #fff; border: 4px solid var(--dark); border-radius: 16px; padding: 14px; font-size: 26px; font-weight: bold; text-align: center; cursor: pointer; box-shadow: var(--shadow); transition: all 0.15s; user-select: none; }
+  .match-item:hover { transform: translateY(-2px); }
+  .match-item.selected { background: var(--yellow); transform: scale(1.05); }
+  .match-item.matched { background: var(--grass); pointer-events: none; opacity: 0.6; }
+  .match-item.wrong-flash { background: var(--red); color: #fff; }
+  .sort-tray { background: var(--mint); border: 4px dashed var(--teal); border-radius: 20px; padding: 14px; min-height: 84px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; }
+  .sort-item { background: #fff; border: 3px solid var(--dark); border-radius: 14px; padding: 12px 18px; font-size: 26px; font-weight: bold; cursor: grab; box-shadow: var(--shadow); user-select: none; touch-action: none; }
+  .sort-item.dragging { opacity: 0.5; cursor: grabbing; }
+  .result-screen { text-align: center; padding: 24px 16px; }
+  .result-screen .big-emoji { font-size: 110px; animation: spin 1s; display: block; margin-bottom: 16px; }
+  @keyframes spin { 0%{transform:scale(0) rotate(0deg);} 100%{transform:scale(1) rotate(360deg);} }
+  .result-screen h2 { font-size: 32px; color: var(--red); margin-bottom: 12px; text-shadow: 2px 2px 0 #fff; }
+  .result-stars { font-size: 54px; margin: 16px 0; letter-spacing: 6px; }
+  .result-stars .s { display: inline-block; animation: starPop 0.5s backwards; }
+  .result-stars .s:nth-child(1) { animation-delay: 0.2s; }
+  .result-stars .s:nth-child(2) { animation-delay: 0.5s; }
+  .result-stars .s:nth-child(3) { animation-delay: 0.8s; }
+  @keyframes starPop { 0%{transform:scale(0) rotate(-180deg);opacity:0;} 80%{transform:scale(1.3);} 100%{transform:scale(1) rotate(0deg);opacity:1;} }
+  .reward-anim { font-size: 70px; margin: 10px; display: inline-block; animation: dance 1.5s infinite; }
+  @keyframes dance { 0%,100%{transform:translateY(0) rotate(-5deg);} 50%{transform:translateY(-15px) rotate(5deg);} }
+  .confetti { position: fixed; top: -10px; font-size: 22px; pointer-events: none; animation: fall linear forwards; z-index: 99; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+  .feedback { text-align: center; margin-top: 14px; font-size: 22px; font-weight: bold; min-height: 32px; }
+  .feedback.good { color: var(--teal); }
+  .feedback.bad { color: var(--red); }
+  /* 答案揭曉泡泡 */
+  .answer-reveal { display: flex; align-items: center; justify-content: center; gap: 12px; border: 3px solid var(--teal); border-radius: 22px; padding: 12px 22px; margin: 10px auto 0; width: fit-content; max-width: 96%; background: #E8FDF9; box-shadow: 0 4px 0 rgba(0,0,0,0.1); animation: arPop 0.4s both; }
+  .answer-reveal.wrong-reveal { border-color: var(--orange); background: #FFF5E8; }
+  .ar-label { font-size: 13px; color: var(--brown); font-weight: normal; white-space: nowrap; }
+  .ar-answer { font-size: 26px; font-weight: bold; color: var(--dark); }
+  .ar-speak-btn { background: var(--sky); color: #fff; border: 2px solid var(--dark); border-radius: 50%; width: 40px; height: 40px; font-size: 20px; cursor: pointer; box-shadow: 0 3px 0 rgba(0,0,0,0.15); flex-shrink: 0; }
+  .ar-speak-btn:active { transform: translateY(2px); box-shadow: none; }
+  @keyframes arPop { 0%{transform:scale(0.4) translateY(10px);opacity:0;} 75%{transform:scale(1.08);} 100%{transform:scale(1) translateY(0);opacity:1;} }
+</style>
+</head>
+<body>
+
+<div class="clouds">
+  <div class="cloud">☁️</div>
+  <div class="cloud">☁️</div>
+  <div class="cloud">⛅</div>
+</div>
+
+<div class="app">
+
+  <!-- ============ 年級首頁 ============ -->
+  <div id="gradeHome" class="page">
+    <div class="header">
+      <h1>🌈 動物學校 🏫</h1>
+      <div class="sub">歡迎來上學！選一個你的年級吧 🎒</div>
+    </div>
+    <div class="grade-grid">
+      <div class="grade-card g1" onclick="openGrade('g1')">
+        <span class="grade-emoji">🐣</span>
+        <h2>1 年級</h2>
+        <p>22 個關卡<br>數學 + 國語</p>
+        <div class="grade-badge ready">✓ 開放中</div>
+      </div>
+      <div class="grade-card g2" onclick="openGrade('g2')">
+        <span class="grade-emoji">🐤</span>
+        <h2>2 年級</h2>
+        <p>18 個關卡<br>乘法 · 部首 · 量詞</p>
+        <div class="grade-badge ready">✓ 開放中</div>
+      </div>
+      <div class="grade-card g3" onclick="openGrade('g3')">
+        <span class="grade-emoji">🐔</span>
+        <h2>3 年級</h2>
+        <p>24 個關卡<br>除法 · 分數 · 修辭 · 自然</p>
+        <div class="grade-badge ready">✓ 開放中</div>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:30px; color:var(--brown); font-size:14px;">
+      ⭐ 目前獲得 <b id="homeStars">0</b> 顆星星 ⭐
+    </div>
+  </div>
+
+  <!-- ============ 科目選單 ============ -->
+  <div id="home" class="page" style="display:none;">
+    <div class="back-bar">
+      <button class="btn small" onclick="goGradeHome()">← 換年級</button>
+      <span class="chapter-title" id="gradeNameDisplay">1 年級</span>
+      <span class="star-display">⭐ <span id="totalStars2">0</span></span>
+    </div>
+    <div class="header" style="padding:10px 0;">
+      <h1 style="font-size:32px;">小朋友，要去哪個教室？</h1>
+    </div>
+    <div class="subject-grid" id="subjectGrid"></div>
+    <div style="text-align:center; margin-top:30px; color:var(--brown); font-size:14px;">
+      💡 第一次來嗎？先去數學館的第一關試試看 ⬆️
+    </div>
+  </div>
+
+  <!-- ============ 關卡選擇 ============ -->
+  <div id="levels" class="page levels-page">
+    <div class="back-bar">
+      <button class="btn small" onclick="goHome()">← 換科目</button>
+      <span class="chapter-title" id="chapterTitle">數學館</span>
+      <span class="star-display">⭐ <span id="totalStars">0</span></span>
+    </div>
+    <div class="levels-grid" id="levelsGrid"></div>
+  </div>
+
+  <!-- ============ 遊戲畫面 ============ -->
+  <div id="game" class="page game-page">
+    <div class="back-bar">
+      <button class="btn small" onclick="exitGame()">← 離開</button>
+      <span class="chapter-title" id="gameTitle">關卡</span>
+      <span class="score-badge">⭐ <span id="gameScore">0</span></span>
+    </div>
+    <div class="game-stage">
+      <div class="game-header">
+        <span>第 <span id="curQ">1</span>/<span id="totalQ">5</span> 題</span>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <span>❤️ <span id="hearts">3</span></span>
+      </div>
+      <div id="gameContent"></div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+  </div>
+
+  <!-- ============ 結果頁 ============ -->
+  <div id="result" class="page" style="display:none;">
+    <div class="game-stage result-screen">
+      <span class="big-emoji" id="resultEmoji">🎉</span>
+      <h2 id="resultTitle">太棒了！</h2>
+      <div class="result-stars" id="resultStars"></div>
+      <p id="resultMsg" style="font-size:20px; color:var(--brown); margin:14px 0;"></p>
+      <div id="rewardAnim"></div>
+      <div style="margin-top:18px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <button class="btn primary" onclick="retryLevel()">🔄 再玩一次</button>
+        <button class="btn pink" onclick="nextLevel()">➡️ 下一關</button>
+        <button class="btn" onclick="backToLevels()">📚 回關卡</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ===== 遊戲資料 ===== */
+const GRADES = {
+  g1: {
+  math: {
+    name: '數學館', icon: '🐻',
+    levels: [
+      { id: 'm1',  num: 1,  title: '數一數',   desc: '1～10 看圖數數',    type: 'counting',  range: [1,10], questions: 6, reward: '🐶' },
+      { id: 'm2',  num: 2,  title: '配對王',   desc: '1～20 數字配對',    type: 'matchNum',  range: [1,20], questions: 5, reward: '🐱' },
+      { id: 'm9',  num: 3,  title: '比大小',   desc: '哪個數比較大',      type: 'compare',   questions: 6, reward: '🐭' },
+      { id: 'm3',  num: 4,  title: '排排站',   desc: '1～50 順序排列',    type: 'sortNum',   range: [1,50], questions: 5, reward: '🐹' },
+      { id: 'm4',  num: 5,  title: '聽聲音',   desc: '1～100 聽音找數字', type: 'listenNum', range: [1,100], questions: 6, reward: '🐰' },
+      { id: 'm5',  num: 6,  title: '加法樂園', desc: '10 以內加法',       type: 'addition',  questions: 6, reward: '🦊' },
+      { id: 'm10', num: 7,  title: '加法挑戰', desc: '20 以內進位加法',   type: 'addition',  max: 20, carry: true, questions: 6, reward: '🐼' },
+      { id: 'm6',  num: 8,  title: '減法樂園', desc: '10 以內減法',       type: 'subtraction', questions: 6, reward: '🐻' },
+      { id: 'm11', num: 9,  title: '單數雙數', desc: '分辨單數和雙數',    type: 'oddeven',   questions: 6, reward: '🐨' },
+      { id: 'm7',  num: 10, title: '形狀王國', desc: '認識平面形狀',      type: 'shapes',    questions: 6, reward: '🦁' },
+      { id: 'm12', num: 11, title: '立體王國', desc: '認識立體形狀',      type: 'shapes3d',  questions: 6, reward: '🐯' },
+      { id: 'm13', num: 12, title: '比長短',   desc: '哪一個比較長',      type: 'length',    questions: 6, reward: '🐸' },
+      { id: 'm14', num: 13, title: '認錢幣',   desc: '數一數有多少錢',    type: 'money',     questions: 6, reward: '🐵' },
+      { id: 'm8',  num: 14, title: '小時鐘',   desc: '整點與半點',        type: 'clock',     questions: 6, reward: '🐧' }
+    ]
+  },
+  chinese: {
+    name: '國語館', icon: '🐰',
+    levels: [
+      { id: 'c1', num: 1, title: '聲符家族',   desc: '21 個聲母',     type: 'bopomofo',       set: 'sheng', questions: 6, reward: '🐥' },
+      { id: 'c2', num: 2, title: '韻符家族',   desc: '13 個韻母',     type: 'bopomofo',       set: 'yun',   questions: 6, reward: '🦄' },
+      { id: 'c3', num: 3, title: '介符組合',   desc: 'ㄧㄨㄩ',        type: 'bopomofo',       set: 'jie',   questions: 4, reward: '🐢' },
+      { id: 'c4', num: 4, title: '聽音辨注音', desc: '混合考驗',      type: 'bopomofoListen', set: 'all',   questions: 6, reward: '🦖' },
+      { id: 'c5', num: 5, title: '四聲挑戰',   desc: '一二三四聲',     type: 'tones',                        questions: 6, reward: '🐳' },
+      { id: 'c8', num: 6, title: '結合韻',     desc: 'ㄧㄚ ㄨㄛ 拼讀', type: 'spell',          pool: 'blend', questions: 6, reward: '🦉' },
+      { id: 'c6', num: 7, title: '注音拼字',   desc: '聽字選注音',     type: 'spell',          pool: 'word',  questions: 6, reward: '🦔' },
+      { id: 'c7', num: 8, title: '形音配對',   desc: '常用國字↔注音', type: 'charMatch',                    questions: 5, reward: '🦋' }
+    ]
+  }
+  },
+  g2: {
+    math: {
+      name: '數學館', icon: '🐻',
+      levels: [
+        { id: 'n1',  num: 1,  title: '數到1000', desc: '百十個位值',     type: 'readbig',    questions: 6, reward: '🐤' },
+        { id: 'n2',  num: 2,  title: '比大小',   desc: '三位數比大小',   type: 'comparebig', questions: 6, reward: '🐣' },
+        { id: 'n3',  num: 3,  title: '二位數加法', desc: '進位加法',      type: 'bigadd',     questions: 6, reward: '🐥' },
+        { id: 'n4',  num: 4,  title: '二位數減法', desc: '退位減法',      type: 'bigsub',     questions: 6, reward: '🐦' },
+        { id: 'n5',  num: 5,  title: '乘法入門', desc: '2,3,4,5 的乘法', type: 'multiply',   table: [2,3,4,5], questions: 6, reward: '🐧' },
+        { id: 'n6',  num: 6,  title: '九九乘法', desc: '6~9 的乘法',     type: 'multiply',   table: [6,7,8,9], questions: 6, reward: '🦆' },
+        { id: 'n7',  num: 7,  title: '幾時幾分', desc: '報讀到 5 分',    type: 'clock',      clockMode: 'minute', questions: 6, reward: '🦉' },
+        { id: 'n8',  num: 8,  title: '長度單位', desc: '公分與公尺',     type: 'mc',         bank: 'lengthUnit', questions: 6, reward: '🦢' },
+        { id: 'n9',  num: 9,  title: '形狀邊角', desc: '邊數與角數',     type: 'mc',         bank: 'polygon', questions: 6, reward: '🦅' },
+        { id: 'n10', num: 10, title: '錢幣計算', desc: '含 50 元',       type: 'money',      denoms: [1,5,10,50], questions: 6, reward: '🐲' }
+      ]
+    },
+    chinese: {
+      name: '國語館', icon: '🐰',
+      levels: [
+        { id: 'k1', num: 1, title: '認識部首', desc: '找出部首',     type: 'mc', bank: 'radical',   questions: 6, reward: '🐉' },
+        { id: 'k2', num: 2, title: '量詞王',   desc: '一隻一條一本', type: 'mc', bank: 'measure',   questions: 6, reward: '🦜' },
+        { id: 'k3', num: 3, title: '反義詞',   desc: '相反的詞',     type: 'mc', bank: 'antonym',   questions: 6, reward: '🦚' },
+        { id: 'k4', num: 4, title: '相似詞',   desc: '意思相近',     type: 'mc', bank: 'synonym',   questions: 6, reward: '🦩' },
+        { id: 'k5', num: 5, title: '標點符號', desc: '句號逗號問號', type: 'mc', bank: 'punct',     questions: 6, reward: '🕊️' },
+        { id: 'k6', num: 6, title: '同音字',   desc: '相同的音',     type: 'mc', bank: 'homophone', questions: 6, reward: '🦃' },
+        { id: 'k7', num: 7, title: '形近字',   desc: '長得很像',     type: 'mc', bank: 'similar',   questions: 6, reward: '🐓' },
+        { id: 'k8', num: 8, title: '造詞高手', desc: '組成語詞',     type: 'mc', bank: 'wordbuild', questions: 6, reward: '🦤' }
+      ]
+    }
+  },
+  g3: {
+    math: {
+      name: '數學館', icon: '🐻',
+      levels: [
+        { id: 'p1',  num: 1,  title: '比大小',     desc: '萬以內的數',     type: 'comparebig', range: [1000,9999], questions: 6, reward: '🐺' },
+        { id: 'p2',  num: 2,  title: '三位數加法', desc: '直式加法',       type: 'arith', op: '+', range: [100,899], questions: 6, reward: '🦝' },
+        { id: 'p3',  num: 3,  title: '三位數減法', desc: '直式減法',       type: 'arith', op: '-', range: [120,999], questions: 6, reward: '🦊' },
+        { id: 'p4',  num: 4,  title: '乘法高手',   desc: '二三位數×一位數', type: 'arith', op: '×', aRange: [12,199], questions: 6, reward: '🐯' },
+        { id: 'p5',  num: 5,  title: '除法入門',   desc: '整除的除法',     type: 'divide', questions: 6, reward: '🦁' },
+        { id: 'p6',  num: 6,  title: '有餘數除法', desc: '算出餘數',       type: 'divide', remainder: true, questions: 6, reward: '🐮' },
+        { id: 'p7',  num: 7,  title: '認識分數',   desc: '幾分之幾',       type: 'fraction', questions: 6, reward: '🐷' },
+        { id: 'p8',  num: 8,  title: '分數加減',   desc: '同分母加減',     type: 'fracadd', questions: 6, reward: '🐹' },
+        { id: 'p9',  num: 9,  title: '時間計算',   desc: '時、分、秒',     type: 'mc', bank: 'time3', questions: 6, reward: '🐭' },
+        { id: 'p10', num: 10, title: '長度重量',   desc: '毫米公里公斤',   type: 'mc', bank: 'units3', questions: 6, reward: '🐰' }
+      ]
+    },
+    chinese: {
+      name: '國語館', icon: '🐰',
+      levels: [
+        { id: 'q1', num: 1, title: '譬喻修辭', desc: '像、好像、如', type: 'mc', bank: 'metaphor',  questions: 6, reward: '🦄' },
+        { id: 'q2', num: 2, title: '擬人修辭', desc: '把東西當人',   type: 'mc', bank: 'personify', questions: 6, reward: '🐲' },
+        { id: 'q3', num: 3, title: '修辭綜合', desc: '誇飾排比設問', type: 'mc', bank: 'rhetoric',  questions: 5, reward: '🦋' },
+        { id: 'q4', num: 4, title: '成語樂園', desc: '常用成語',     type: 'mc', bank: 'idiom',     questions: 6, reward: '🐝' },
+        { id: 'q5', num: 5, title: '標點進階', desc: '頓號引號冒號', type: 'mc', bank: 'punct3',    questions: 5, reward: '🐞' },
+        { id: 'q6', num: 6, title: '關聯句型', desc: '因為所以雖然', type: 'mc', bank: 'sentence',  questions: 5, reward: '🦜' },
+        { id: 'q7', num: 7, title: '詞語高手', desc: '多義與詞語',   type: 'mc', bank: 'multiword', questions: 5, reward: '🦚' },
+        { id: 'q8', num: 8, title: '閱讀理解', desc: '讀短文回答',   type: 'mc', bank: 'reading',   questions: 6, reward: '🦉' }
+      ]
+    },
+    science: {
+      name: '自然館', icon: '🦎',
+      levels: [
+        { id: 's1', num: 1, title: '植物世界', desc: '根莖葉花果',   type: 'mc', bank: 'plant',   questions: 6, reward: '🌳' },
+        { id: 's2', num: 2, title: '動物王國', desc: '昆蟲與動物',   type: 'mc', bank: 'animal',  questions: 6, reward: '🦋' },
+        { id: 's3', num: 3, title: '神奇磁鐵', desc: '磁極與磁力',   type: 'mc', bank: 'magnet',  questions: 6, reward: '🧲' },
+        { id: 's4', num: 4, title: '空氣天氣', desc: '空氣與天氣',   type: 'mc', bank: 'weather', questions: 6, reward: '🌤️' },
+        { id: 's5', num: 5, title: '水與物質', desc: '固體液體變化', type: 'mc', bank: 'water',   questions: 6, reward: '💧' },
+        { id: 's6', num: 6, title: '光與影子', desc: '光和影子',     type: 'mc', bank: 'light',   questions: 6, reward: '🔦' }
+      ]
+    }
+  }
+};
+let SUBJECTS = GRADES.g1;
+
+const SHENG = ['ㄅ','ㄆ','ㄇ','ㄈ','ㄉ','ㄊ','ㄋ','ㄌ','ㄍ','ㄎ','ㄏ','ㄐ','ㄑ','ㄒ','ㄓ','ㄔ','ㄕ','ㄖ','ㄗ','ㄘ','ㄙ'];
+const YUN = ['ㄚ','ㄛ','ㄜ','ㄝ','ㄞ','ㄟ','ㄠ','ㄡ','ㄢ','ㄣ','ㄤ','ㄥ','ㄦ','ㄧ','ㄨ','ㄩ'];
+const JIE = ['ㄧ','ㄨ','ㄩ'];
+const BOPO_SOUND = {
+  'ㄅ':'波','ㄆ':'坡','ㄇ':'摸','ㄈ':'佛','ㄉ':'的','ㄊ':'特','ㄋ':'呢','ㄌ':'勒',
+  'ㄍ':'哥','ㄎ':'科','ㄏ':'喝','ㄐ':'雞','ㄑ':'七','ㄒ':'西','ㄓ':'知','ㄔ':'吃',
+  'ㄕ':'詩','ㄖ':'日','ㄗ':'資','ㄘ':'此','ㄙ':'絲',
+  'ㄚ':'啊','ㄛ':'喔','ㄜ':'鵝','ㄝ':'耶','ㄞ':'哀','ㄟ':'欸','ㄠ':'熬','ㄡ':'歐',
+  'ㄢ':'安','ㄣ':'恩','ㄤ':'骯','ㄥ':'鞥','ㄦ':'兒','ㄧ':'衣','ㄨ':'屋','ㄩ':'淤'
+};
+const NUM_CHAR = ['零','一','二','三','四','五','六','七','八','九','十','十一','十二','十三','十四','十五','十六','十七','十八','十九','二十'];
+const ITEM_EMOJIS = ['🍎','🍌','🍇','🍓','🍊','🍉','🐶','🐱','🐭','🐰','🐻','🦊','⭐','🌟','🎈','🌸','🌻','🦋','🐝','🐞'];
+const REWARDS = ['🐶','🐱','🐰','🐻','🦊','🐼','🐨','🦁','🐯','🐸','🐵','🐧','🐥','🦄','🐢','🦖','🐳','🦉','🦔','🐹'];
+
+const SHAPES = [
+  { emoji: '⭕', name: '圓形' },
+  { emoji: '🔺', name: '三角形' },
+  { emoji: '🟥', name: '正方形' },
+  { emoji: '🟦', name: '長方形' }
+];
+
+const SHAPES3D = [
+  { emoji: '⚽', name: '球體' },
+  { emoji: '🎲', name: '正方體' },
+  { emoji: '📦', name: '長方體' },
+  { emoji: '🥫', name: '圓柱' }
+];
+
+const TONE_GROUPS = [
+  { base: 'ㄇㄚ', words: ['媽','麻','馬','罵'] },
+  { base: 'ㄅㄚ', words: ['八','拔','把','爸'] },
+  { base: 'ㄒㄧ', words: ['西','席','洗','戲'] },
+  { base: 'ㄏㄨ', words: ['呼','胡','虎','戶'] },
+  { base: 'ㄈㄟ', words: ['飛','肥','匪','費'] },
+  { base: 'ㄧ',  words: ['衣','姨','椅','意'] },
+  { base: 'ㄕㄨ', words: ['書','熟','數','樹'] },
+  { base: 'ㄊㄤ', words: ['湯','糖','躺','燙'] },
+  { base: 'ㄓㄨ', words: ['豬','竹','主','住'] },
+  { base: 'ㄇㄠ', words: ['貓','毛','卯','冒'] }
+];
+const TONE_MARKS = ['','ˊ','ˇ','ˋ'];
+const TONE_NAMES = ['一聲','二聲','三聲','四聲'];
+
+const SPELL_BANK = {
+  word: [
+    { char: '媽', bopo: 'ㄇㄚ' }, { char: '爸', bopo: 'ㄅㄚ' }, { char: '哥', bopo: 'ㄍㄜ' },
+    { char: '弟', bopo: 'ㄉㄧ' }, { char: '貓', bopo: 'ㄇㄠ' }, { char: '狗', bopo: 'ㄍㄡ' },
+    { char: '兔', bopo: 'ㄊㄨ' }, { char: '魚', bopo: 'ㄩ' },   { char: '鳥', bopo: 'ㄋㄧㄠ' },
+    { char: '羊', bopo: 'ㄧㄤ' }, { char: '花', bopo: 'ㄏㄨㄚ' }, { char: '草', bopo: 'ㄘㄠ' },
+    { char: '雲', bopo: 'ㄩㄣ' }, { char: '風', bopo: 'ㄈㄥ' }, { char: '書', bopo: 'ㄕㄨ' },
+    { char: '筆', bopo: 'ㄅㄧ' }, { char: '車', bopo: 'ㄔㄜ' }, { char: '門', bopo: 'ㄇㄣ' },
+    { char: '燈', bopo: 'ㄉㄥ' }, { char: '糖', bopo: 'ㄊㄤ' }, { char: '球', bopo: 'ㄑㄧㄡ' },
+    { char: '飯', bopo: 'ㄈㄢ' }, { char: '茶', bopo: 'ㄔㄚ' }
+  ],
+  blend: [
+    { char: '鴨', bopo: 'ㄧㄚ' }, { char: '腰', bopo: 'ㄧㄠ' }, { char: '煙', bopo: 'ㄧㄢ' },
+    { char: '蛙', bopo: 'ㄨㄚ' }, { char: '窩', bopo: 'ㄨㄛ' }, { char: '彎', bopo: 'ㄨㄢ' },
+    { char: '月', bopo: 'ㄩㄝ' }, { char: '雲', bopo: 'ㄩㄣ' }, { char: '蝦', bopo: 'ㄒㄧㄚ' },
+    { char: '爺', bopo: 'ㄧㄝ' }, { char: '威', bopo: 'ㄨㄟ' }, { char: '歪', bopo: 'ㄨㄞ' },
+    { char: '靴', bopo: 'ㄒㄩㄝ' }, { char: '蚊', bopo: 'ㄨㄣ' }
+  ]
+};
+const SPELL_WORDS = SPELL_BANK.word;
+
+const CHAR_MATCH = [
+  { char: '大', bopo: 'ㄉㄚ' }, { char: '小', bopo: 'ㄒㄧㄠ' }, { char: '人', bopo: 'ㄖㄣ' },
+  { char: '口', bopo: 'ㄎㄡ' }, { char: '手', bopo: 'ㄕㄡ' }, { char: '日', bopo: 'ㄖ' },
+  { char: '月', bopo: 'ㄩㄝ' }, { char: '山', bopo: 'ㄕㄢ' }, { char: '水', bopo: 'ㄕㄨㄟ' },
+  { char: '火', bopo: 'ㄏㄨㄛ' }, { char: '木', bopo: 'ㄇㄨ' }, { char: '上', bopo: 'ㄕㄤ' },
+  { char: '下', bopo: 'ㄒㄧㄚ' }, { char: '中', bopo: 'ㄓㄨㄥ' }, { char: '天', bopo: 'ㄊㄧㄢ' },
+  { char: '地', bopo: 'ㄉㄧ' }, { char: '雲', bopo: 'ㄩㄣ' }, { char: '花', bopo: 'ㄏㄨㄚ' },
+  { char: '魚', bopo: 'ㄩ' }, { char: '鳥', bopo: 'ㄋㄧㄠ' }, { char: '牛', bopo: 'ㄋㄧㄡ' },
+  { char: '羊', bopo: 'ㄧㄤ' }, { char: '馬', bopo: 'ㄇㄚ' }, { char: '白', bopo: 'ㄅㄞ' },
+  { char: '七', bopo: 'ㄑㄧ' }, { char: '土', bopo: 'ㄊㄨ' }, { char: '石', bopo: 'ㄕ' },
+  { char: '耳', bopo: 'ㄦ' }, { char: '心', bopo: 'ㄒㄧㄣ' }, { char: '門', bopo: 'ㄇㄣ' },
+  { char: '果', bopo: 'ㄍㄨㄛ' }, { char: '王', bopo: 'ㄨㄤ' }
+];
+
+/* ===== 狀態 ===== */
+const STORAGE_KEY = 'animal_school_v1';
+let state = loadState();
+let currentSubject = null;
+let currentLevel = null;
+let game = null;
+let matchSelected = null;
+
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { stars: {}, rewards: [] }; }
+  catch(e) { return { stars: {}, rewards: [] }; }
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){}
+}
+function getStars(id) { return state.stars[id] || 0; }
+function setStars(id, n) { if (n > getStars(id)) { state.stars[id] = n; saveState(); } }
+function totalStars() { return Object.values(state.stars).reduce((a,b)=>a+b, 0); }
+
+/* ===== 頁面切換 ===== */
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  document.getElementById(id).style.display = 'block';
+}
+function goGradeHome() {
+  showPage('gradeHome');
+  document.getElementById('homeStars').textContent = totalStars();
+  speechSynthesis.cancel();
+}
+const SUBJECT_BLURB = { math: '數字 · 計算 · 形狀', chinese: '注音 · 詞語 · 閱讀', science: '觀察 · 探索 · 大自然' };
+function openGrade(g) {
+  if (!GRADES[g]) return;
+  SUBJECTS = GRADES[g];
+  document.getElementById('gradeNameDisplay').textContent = (g === 'g1' ? '1 年級' : g === 'g2' ? '2 年級' : '3 年級');
+  document.getElementById('totalStars2').textContent = totalStars();
+  const grid = document.getElementById('subjectGrid');
+  grid.innerHTML = '';
+  Object.keys(SUBJECTS).forEach(key => {
+    const subj = SUBJECTS[key];
+    const card = document.createElement('div');
+    card.className = 'subject-card ' + key;
+    card.onclick = () => openSubject(key);
+    card.innerHTML = `<span class="animal">${subj.icon}</span><h2>${subj.name}</h2><p>${SUBJECT_BLURB[key] || ''}</p>`;
+    grid.appendChild(card);
+  });
+  showPage('home');
+}
+function goHome() {
+  showPage('home');
+  document.getElementById('totalStars2').textContent = totalStars();
+  speechSynthesis.cancel();
+}
+function openSubject(key) {
+  currentSubject = key;
+  const subj = SUBJECTS[key];
+  document.getElementById('chapterTitle').textContent = subj.icon + ' ' + subj.name;
+  document.getElementById('totalStars').textContent = totalStars();
+  const grid = document.getElementById('levelsGrid');
+  grid.innerHTML = '';
+  subj.levels.forEach((lv, i) => {
+    const prev = i > 0 ? subj.levels[i-1].id : null;
+    const locked = prev && getStars(prev) === 0;
+    const card = document.createElement('div');
+    card.className = 'level-card' + (locked ? ' locked' : '');
+    const s = getStars(lv.id);
+    card.innerHTML = `
+      <div class="num">${lv.num}</div>
+      <h3>${lv.title}</h3>
+      <div class="desc">${lv.desc}</div>
+      <div class="stars">${'⭐'.repeat(s)}${'☆'.repeat(3-s)}</div>
+    `;
+    if (!locked) card.onclick = () => startLevel(lv);
+    grid.appendChild(card);
+  });
+  showPage('levels');
+}
+
+/* ===== TTS ===== */
+let voices = [];
+function loadVoices() { voices = speechSynthesis.getVoices(); }
+if (typeof speechSynthesis !== 'undefined') {
+  speechSynthesis.onvoiceschanged = loadVoices;
+  loadVoices();
+}
+function speak(text, rate=0.85) {
+  if (typeof speechSynthesis === 'undefined') return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'zh-TW';
+  u.rate = rate;
+  u.pitch = 1.1;
+  const zh = voices.find(v => v.lang.startsWith('zh-TW')) || voices.find(v => v.lang.startsWith('zh'));
+  if (zh) u.voice = zh;
+  speechSynthesis.speak(u);
+}
+function speakBopo(b) { speak(BOPO_SOUND[b] || b, 0.7); }
+function speakNum(n) { speak(numberToZh(n), 0.85); }
+
+/* ===== 答案揭曉泡泡 ===== */
+let _arSpeakFn = null;
+function showAnswerReveal(isCorrect, answerHTML, speakFn) {
+  const old = document.getElementById('answerReveal');
+  if (old) old.remove();
+  _arSpeakFn = speakFn;
+  const div = document.createElement('div');
+  div.id = 'answerReveal';
+  div.className = 'answer-reveal' + (isCorrect ? '' : ' wrong-reveal');
+  div.innerHTML =
+    `<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+       <span class="ar-label">${isCorrect ? '✅ 答對了！正確答案是' : '💡 正確答案是'}</span>
+       <span class="ar-answer">${answerHTML}</span>
+     </div>
+     <button class="ar-speak-btn" title="再聽一次" onclick="_arSpeakFn&&_arSpeakFn()">🔊</button>`;
+  const fb = document.getElementById('feedback');
+  if (fb && fb.parentNode) fb.parentNode.insertBefore(div, fb.nextSibling);
+  if (speakFn) setTimeout(speakFn, 450);
+}
+function numberToZh(n) {
+  if (n <= 20) return NUM_CHAR[n];
+  const tens = ['','十','二十','三十','四十','五十','六十','七十','八十','九十'];
+  const ones = ['','一','二','三','四','五','六','七','八','九'];
+  if (n === 100) return '一百';
+  if (n < 100) {
+    const t = Math.floor(n/10), o = n%10;
+    return tens[t] + ones[o];
+  }
+  return String(n);
+}
+
+/* ===== 工具 ===== */
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i=a.length-1; i>0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; }
+  return a;
+}
+function randInt(min, max) { return Math.floor(Math.random()*(max-min+1)) + min; }
+function pickRandom(arr, n) { return shuffle(arr).slice(0, n); }
+
+/* ===== 主流程 ===== */
+function startLevel(level) {
+  currentLevel = level;
+  game = { level, qIndex: 0, score: 0, hearts: 3, correctCount: 0 };
+  document.getElementById('gameTitle').textContent = level.title;
+  document.getElementById('totalQ').textContent = level.questions;
+  document.getElementById('gameScore').textContent = 0;
+  document.getElementById('hearts').textContent = 3;
+  showPage('game');
+  nextQuestion();
+}
+function nextQuestion() {
+  if (game.qIndex >= game.level.questions || game.hearts <= 0) {
+    finishLevel(); return;
+  }
+  document.getElementById('curQ').textContent = game.qIndex + 1;
+  document.getElementById('progressFill').style.width = (game.qIndex / game.level.questions * 100) + '%';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  const old = document.getElementById('answerReveal');
+  if (old) old.remove();
+  const t = game.level.type;
+  if (t === 'counting') renderCounting();
+  else if (t === 'matchNum') renderMatchNum();
+  else if (t === 'sortNum') renderSortNum();
+  else if (t === 'listenNum') renderListenNum();
+  else if (t === 'bopomofo') renderBopomofo();
+  else if (t === 'bopomofoListen') renderBopoListen();
+  else if (t === 'addition') renderAddition();
+  else if (t === 'subtraction') renderSubtraction();
+  else if (t === 'shapes') renderShapes();
+  else if (t === 'shapes3d') renderShapes3d();
+  else if (t === 'clock') renderClock();
+  else if (t === 'compare') renderCompare();
+  else if (t === 'oddeven') renderOddEven();
+  else if (t === 'length') renderLength();
+  else if (t === 'money') renderMoney();
+  else if (t === 'bigadd') renderBigAdd();
+  else if (t === 'bigsub') renderBigSub();
+  else if (t === 'multiply') renderMultiply();
+  else if (t === 'readbig') renderReadBig();
+  else if (t === 'comparebig') renderCompareBig();
+  else if (t === 'arith') renderArith();
+  else if (t === 'divide') renderDivide();
+  else if (t === 'fraction') renderFraction();
+  else if (t === 'fracadd') renderFracAdd();
+  else if (t === 'mc') renderMC();
+  else if (t === 'tones') renderTones();
+  else if (t === 'spell') renderSpell();
+  else if (t === 'charMatch') renderCharMatch();
+}
+/* 通用四選一檢查 */
+function checkGeneric(btn, choice, ans, revealHTML, speakText, okMsg, badMsg) {
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+  const speakFn = () => speak(speakText);
+  if (String(choice) === String(ans)) {
+    btn.classList.add('correct');
+    showAnswerReveal(true, revealHTML, speakFn);
+    answerCorrect(okMsg || '答對啦！🎉');
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.option-btn').forEach(b => { if (b.dataset.val === String(ans)) b.classList.add('correct'); });
+    showAnswerReveal(false, revealHTML, speakFn);
+    answerWrong(badMsg || '再試試 💪');
+  }
+}
+function answerCorrect(msg = '答對啦！🎉') {
+  game.score++;
+  game.correctCount++;
+  document.getElementById('gameScore').textContent = game.score;
+  const fb = document.getElementById('feedback');
+  fb.textContent = msg;
+  fb.className = 'feedback good';
+  setTimeout(() => { game.qIndex++; nextQuestion(); }, 1200);
+}
+function answerWrong(msg = '差一點！再試試 💪') {
+  game.hearts--;
+  document.getElementById('hearts').textContent = game.hearts;
+  const fb = document.getElementById('feedback');
+  fb.textContent = msg;
+  fb.className = 'feedback bad';
+  setTimeout(() => { game.qIndex++; nextQuestion(); }, 1500);
+}
+
+/* ===== M1: 數一數 ===== */
+function renderCounting() {
+  const ans = randInt(1, 10);
+  const emoji = ITEM_EMOJIS[randInt(0, ITEM_EMOJIS.length-1)];
+  let items = '';
+  for (let i=0; i<ans; i++) items += `<span class="item">${emoji}</span>`;
+  let choices = [ans, ans+1, ans-1, ans+2].filter(x => x>0 && x<=10);
+  while (choices.length < 4) {
+    const r = randInt(1,10);
+    if (!choices.includes(r)) choices.push(r);
+  }
+  choices = shuffle(choices.slice(0,4));
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question">
+      <div class="prompt">數一數有幾個？<button class="speak-btn" onclick="speak('數一數有幾個')">🔊</button></div>
+    </div>
+    <div class="counting-area">${items}</div>
+    <div class="options">
+      ${choices.map(c => `<button class="option-btn" onclick="checkCounting(this, ${c}, ${ans})">${c}</button>`).join('')}
+    </div>`;
+}
+function checkCounting(btn, choice, ans) {
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+  if (choice === ans) {
+    btn.classList.add('correct');
+    showAnswerReveal(true, `${ans} 個`, () => speakNum(ans));
+    answerCorrect(`對！是 ${ans} 個 🎉`);
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.option-btn').forEach(b => { if (parseInt(b.textContent) === ans) b.classList.add('correct'); });
+    showAnswerReveal(false, `${ans} 個`, () => speakNum(ans));
+    answerWrong(`正確答案是 ${ans} 個`);
+  }
+}
+
+/* ===== M2: 數字配對 ===== */
+function renderMatchNum() {
+  const pool = [];
+  for (let i=1; i<=20; i++) pool.push(i);
+  const picks = pickRandom(pool, 4);
+  const leftItems = picks.map(n => ({ key: n, text: String(n) }));
+  const rightItems = shuffle(picks).map(n => ({ key: n, text: NUM_CHAR[n] }));
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question">
+      <div class="prompt">把一樣的數字配對起來！<button class="speak-btn" onclick="speak('把一樣的數字配對起來')">🔊</button></div>
+    </div>
+    <div class="match-grid">
+      <div class="match-col" id="matchLeft"></div>
+      <div class="match-col" id="matchRight"></div>
+    </div>`;
+  const leftEl = document.getElementById('matchLeft');
+  const rightEl = document.getElementById('matchRight');
+  leftItems.forEach(it => {
+    const d = document.createElement('div');
+    d.className = 'match-item';
+    d.textContent = it.text;
+    d.dataset.key = String(it.key);
+    d.dataset.side = 'L';
+    d.onclick = () => matchClick(d, true);
+    leftEl.appendChild(d);
+  });
+  rightItems.forEach(it => {
+    const d = document.createElement('div');
+    d.className = 'match-item';
+    d.textContent = it.text;
+    d.dataset.key = String(it.key);
+    d.dataset.side = 'R';
+    d.onclick = () => matchClick(d, true);
+    rightEl.appendChild(d);
+  });
+  matchSelected = null;
+  game.matchTotal = 4;
+  game.matchDone = 0;
+}
+function matchClick(el, isNum) {
+  if (el.classList.contains('matched')) return;
+  if (!matchSelected) { matchSelected = el; el.classList.add('selected'); return; }
+  if (matchSelected === el) { el.classList.remove('selected'); matchSelected = null; return; }
+  if (matchSelected.dataset.side === el.dataset.side) {
+    matchSelected.classList.remove('selected');
+    matchSelected = el; el.classList.add('selected'); return;
+  }
+  if (matchSelected.dataset.key === el.dataset.key) {
+    matchSelected.classList.remove('selected');
+    matchSelected.classList.add('matched');
+    el.classList.add('matched');
+    if (isNum) speakNum(parseInt(el.dataset.key));
+    else speak(el.dataset.key);
+    matchSelected = null;
+    game.matchDone++;
+    if (game.matchDone >= game.matchTotal) answerCorrect('全部配對成功！🎊');
+  } else {
+    const a = matchSelected, b = el;
+    a.classList.add('wrong-flash'); b.classList.add('wrong-flash');
+    setTimeout(() => {
+      a.classList.remove('wrong-flash','selected');
+      b.classList.remove('wrong-flash');
+      matchSelected = null;
+    }, 600);
+    const fb = document.getElementById('feedback');
+    fb.textContent = '不是這對唷！再看看 👀';
+    fb.className = 'feedback bad';
+  }
+}
+
+/* ===== M3: 排排站（拖曳） ===== */
+function renderSortNum() {
+  const start = randInt(1, 45);
+  const nums = [start, start+1, start+2, start+3, start+4];
+  const shuffled = shuffle(nums);
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question">
+      <div class="prompt">從小到大排排站！把數字拖到下面<button class="speak-btn" onclick="speak('從小到大排排站')">🔊</button></div>
+    </div>
+    <div class="sort-tray" id="sortPool">
+      ${shuffled.map(n => `<div class="sort-item" draggable="true" data-num="${n}">${n}</div>`).join('')}
+    </div>
+    <div style="text-align:center; margin:12px 0; font-size:16px;">⬇️ 拖到下面 ⬇️</div>
+    <div class="sort-tray" id="sortSlots" style="background:#FFE8B0;"></div>
+    <div style="text-align:center; margin-top:12px;">
+      <button class="btn primary" onclick="checkSort([${nums.join(',')}])">✓ 完成</button>
+    </div>`;
+  setupDragSort();
+}
+function setupDragSort() {
+  const items = document.querySelectorAll('.sort-item');
+  const trays = document.querySelectorAll('.sort-tray');
+  items.forEach(item => {
+    item.addEventListener('dragstart', e => {
+      item.classList.add('dragging');
+      e.dataTransfer.setData('text/plain', item.dataset.num);
+    });
+    item.addEventListener('dragend', () => item.classList.remove('dragging'));
+    item.addEventListener('touchstart', touchStart, {passive:false});
+  });
+  trays.forEach(tray => {
+    tray.addEventListener('dragover', e => { e.preventDefault(); });
+    tray.addEventListener('drop', e => {
+      e.preventDefault();
+      const dragging = document.querySelector('.sort-item.dragging');
+      if (dragging) tray.appendChild(dragging);
+    });
+  });
+}
+let touchDrag = null;
+function touchStart(e) {
+  e.preventDefault();
+  touchDrag = e.target;
+  touchDrag.classList.add('dragging');
+  document.addEventListener('touchmove', touchMove, {passive:false});
+  document.addEventListener('touchend', touchEnd);
+}
+function touchMove(e) {
+  e.preventDefault();
+  if (!touchDrag) return;
+  const t = e.touches[0];
+  touchDrag.style.position = 'fixed';
+  touchDrag.style.left = (t.clientX - 30) + 'px';
+  touchDrag.style.top = (t.clientY - 30) + 'px';
+  touchDrag.style.zIndex = 1000;
+}
+function touchEnd(e) {
+  if (!touchDrag) return;
+  const t = e.changedTouches[0];
+  touchDrag.style.position = ''; touchDrag.style.left = ''; touchDrag.style.top = ''; touchDrag.style.zIndex = '';
+  const el = document.elementFromPoint(t.clientX, t.clientY);
+  const tray = el?.closest('.sort-tray');
+  if (tray) tray.appendChild(touchDrag);
+  touchDrag.classList.remove('dragging');
+  touchDrag = null;
+  document.removeEventListener('touchmove', touchMove);
+  document.removeEventListener('touchend', touchEnd);
+}
+function checkSort(correct) {
+  const slots = document.getElementById('sortSlots');
+  const placed = [...slots.querySelectorAll('.sort-item')].map(x => parseInt(x.dataset.num));
+  if (placed.length !== correct.length) {
+    const fb = document.getElementById('feedback');
+    fb.textContent = '還沒拖完唷！'; fb.className = 'feedback bad';
+    return;
+  }
+  const ok = placed.every((v,i) => v === correct[i]);
+  if (ok) {
+    slots.querySelectorAll('.sort-item').forEach(x => x.style.background = 'var(--grass)');
+    answerCorrect('排對了！👏');
+  } else {
+    answerWrong(`正確順序：${correct.join(' → ')}`);
+  }
+}
+
+/* ===== M4: 聽聲音找數字 ===== */
+function renderListenNum() {
+  const ans = randInt(1, 100);
+  const choices = new Set([ans]);
+  while (choices.size < 4) {
+    const cand = ans + randInt(-15, 15);
+    if (cand >= 1 && cand <= 100 && cand !== ans) choices.add(cand);
+  }
+  const arr = shuffle([...choices]);
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question">
+      <div class="prompt">聽聽看老師念哪個數字？</div>
+      <button class="speak-btn" style="width:80px; height:80px; font-size:36px;" onclick="speakNum(${ans})">🔊</button>
+      <div style="margin-top:6px; color:var(--brown); font-size:14px;">點喇叭聽聲音</div>
+    </div>
+    <div class="options">
+      ${arr.map(c => `<button class="option-btn" onclick="checkListenNum(this, ${c}, ${ans})">${c}</button>`).join('')}
+    </div>`;
+  setTimeout(() => speakNum(ans), 400);
+}
+function checkListenNum(btn, choice, ans) {
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+  if (choice === ans) {
+    btn.classList.add('correct');
+    showAnswerReveal(true, `${ans}（${numberToZh(ans)}）`, () => speakNum(ans));
+    answerCorrect(`對！是 ${ans} 🎉`);
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.option-btn').forEach(b => { if (parseInt(b.textContent) === ans) b.classList.add('correct'); });
+    showAnswerReveal(false, `${ans}（${numberToZh(ans)}）`, () => speakNum(ans));
+    answerWrong(`正確是 ${ans} 喔`);
+  }
+}
+
+/* ===== M5: 加法 ===== */
+function renderAddition() {
+  const max = game.level.max || 10;
+  let a, b;
+  if (game.level.carry) {
+    a = randInt(3, 9);
+    b = randInt(11 - a, Math.min(9, max - a));
+    if (b < 1) b = randInt(2, 9);
+  } else {
+    a = randInt(1, 5);
+    b = randInt(1, max - a);
+  }
+  const ans = a + b;
+  const choices = new Set([ans]);
+  while (choices.size < 4) {
+    const cand = ans + randInt(-3, 3);
+    if (cand >= 0 && cand <= max + 2 && cand !== ans) choices.add(cand);
+  }
+  const arr = shuffle([...choices]);
+  const emoji = ITEM_EMOJIS[randInt(0, ITEM_EMOJIS.length-1)];
+  let visualA = '';
+  for (let i=0; i<a; i++) visualA += `<span class="item">${emoji}</span>`;
+  let visualB = '';
+  for (let i=0; i<b; i++) visualB += `<span class="item">${emoji}</span>`;
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question">
+      <div class="prompt">算算看，總共有幾個？<button class="speak-btn" onclick="speak('${a} 加 ${b} 等於多少')">🔊</button></div>
+    </div>
+    <div class="counting-area" style="flex-direction:column; gap:8px;">
+      <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center; align-items:center;">
+        ${visualA}<span style="font-size:42px;">➕</span>${visualB}
+      </div>
+      <div class="big-display" style="font-size:54px; margin:8px 0;">${a} + ${b} = ?</div>
+    </div>
+    <div class="options">
+      ${arr.map(c => `<button class="option-btn" onclick="checkMathAns(this, ${c}, ${ans})">${c}</button>`).join('')}
+    </div>`;
+}
+
+/* ===== M6: 減法 ===== */
+function renderSubtraction() {
+  const a = randInt(3, 10);
+  const b = randInt(1, a);
+  const ans = a - b;
+  const choices = new Set([ans]);
+  while (choices.size < 4) {
+    const cand = ans + randInt(-3, 3);
+    if (cand >= 0 && cand <= 10 && cand !== ans) choices.add(cand);
+  }
+  const arr = shuffle([...choices]);
+  const emoji = ITEM_EMOJIS[randInt(0, ITEM_EMOJIS.length-1)];
+  let visualA = '';
+  for (let i=0; i<a; i++) {
+    const style = i < b ? 'style="opacity:0.3; text-decoration:line-through;"' : '';
+    visualA += `<span class="item" ${style}>${emoji}</span>`;
+  }
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question">
+      <div class="prompt">算算看，還剩幾個？<button class="speak-btn" onclick="speak('${a} 減 ${b} 等於多少')">🔊</button></div>
+    </div>
+    <div class="counting-area" style="flex-direction:column; gap:8px;">
+      <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:center;">${visualA}</div>
+      <div class="big-display" style="font-size:54px; margin:8px 0;">${a} − ${b} = ?</div>
+    </div>
+    <div class="options">
+      ${arr.map(c => `<button class="option-btn" onclick="checkMathAns(this, ${c}, ${ans})">${c}</button>`).join('')}
+    </div>`;
+}
+function checkMathAns(btn, choice, ans) {
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+  if (choice === ans) {
+    btn.classList.add('correct');
+    showAnswerReveal(true, `${ans}（${numberToZh(ans)}）`, () => speakNum(ans));
+    answerCorrect(`答對！等於 ${ans} 🎉`);
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.option-btn').forEach(b => { if (parseInt(b.textContent) === ans) b.classList.add('correct'); });
+    showAnswerReveal(false, `${ans}（${numberToZh(ans)}）`, () => speakNum(ans));
+    answerWrong(`正確答案是 ${ans} 喔`);
+  }
+}
+
+/* ===== M7: 形狀辨識 ===== */
+function renderShapes() {
+  const ans = SHAPES[randInt(0, SHAPES.length-1)];
+  const distractors = shuffle(SHAPES.filter(s => s.name !== ans.name)).slice(0,3);
+  const choices = shuffle([ans, ...distractors]);
+  const mode = Math.random() < 0.5 ? 'image' : 'name';
+  if (mode === 'image') {
+    document.getElementById('gameContent').innerHTML = `
+      <div class="question">
+        <div class="prompt">這是什麼形狀？<button class="speak-btn" onclick="speak('這是什麼形狀')">🔊</button></div>
+      </div>
+      <div style="font-size:130px; text-align:center; margin:16px 0;">${ans.emoji}</div>
+      <div class="options">
+        ${choices.map(c => `<button class="option-btn" style="font-size:22px;" onclick="checkShape(this, '${c.name}', '${ans.name}')">${c.name}</button>`).join('')}
+      </div>`;
+  } else {
+    document.getElementById('gameContent').innerHTML = `
+      <div class="question">
+        <div class="prompt">找出「<span style="color:var(--red); font-size:28px;">${ans.name}</span>」<button class="speak-btn" onclick="speak('找出 ${ans.name}')">🔊</button></div>
+      </div>
+      <div class="options">
+        ${choices.map(c => `<button class="option-btn" style="font-size:54px; padding:26px 10px;" onclick="checkShape(this, '${c.name}', '${ans.name}')">${c.emoji}</button>`).join('')}
+      </div>`;
+  }
+  setTimeout(() => speak(ans.name), 400);
+}
+function checkShape(btn, choice, ans) {
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+  if (choice === ans) {
+    btn.classList.add('correct');
+    const emoji = SHAPES.find(s => s.name === ans)?.emoji || '';
+    showAnswerReveal(true, `${emoji} ${ans}`, () => speak(ans));
+    answerCorrect(`對！這是${ans} 🎊`);
+  } else {
+    btn.classList.add('wrong');
+    const emoji = SHAPES.find(s => s.name === ans)?.emoji || '';
+    showAnswerReveal(false, `${emoji} ${ans}`, () => speak(ans));
+    answerWrong(`正確是${ans}喔`);
+  }
+}
+
+/* ===== M8: 時鐘 ===== */
+function renderClock() {
+  const mode = game.level.clockMode || 'half';
+  const hour = randInt(1, 12);
+  let minute;
+  if (mode === 'minute') minute = randInt(0, 11) * 5;
+  else minute = (Math.random() < 0.5) ? 30 : 0;
+  const fmt = (h, m) => m === 0 ? `${h} 點整` : (m === 30 && mode !== 'minute') ? `${h} 點半` : `${h} 點 ${m} 分`;
+  const hourAngle = (hour % 12) * 30 + minute * 0.5;
+  const minAngle = minute * 6;
+  const numbers = [12,1,2,3,4,5,6,7,8,9,10,11].map((n,i) => {
+    const ang = (i*30 - 90) * Math.PI / 180;
+    const x = 100 + 70 * Math.cos(ang);
+    const y = 100 + 70 * Math.sin(ang);
+    return `<text x="${x}" y="${y+7}" text-anchor="middle" font-size="20" font-weight="bold" fill="#2D3436">${n}</text>`;
+  }).join('');
+  const clockSVG = `
+    <svg viewBox="0 0 200 200" width="200" height="200" style="display:block; margin:0 auto;">
+      <circle cx="100" cy="100" r="90" fill="#FFF8E7" stroke="#2D3436" stroke-width="6"/>
+      ${numbers}
+      <line x1="100" y1="100" x2="${100 + 50 * Math.sin(hourAngle * Math.PI/180)}" y2="${100 - 50 * Math.cos(hourAngle * Math.PI/180)}" stroke="#FF6B6B" stroke-width="8" stroke-linecap="round"/>
+      <line x1="100" y1="100" x2="${100 + 70 * Math.sin(minAngle * Math.PI/180)}" y2="${100 - 70 * Math.cos(minAngle * Math.PI/180)}" stroke="#4ECDC4" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="100" cy="100" r="6" fill="#2D3436"/>
+    </svg>`;
+  const correctLabel = fmt(hour, minute);
+  const choices = new Set([correctLabel]);
+  while (choices.size < 4) {
+    const h = randInt(1, 12);
+    let m;
+    if (mode === 'minute') m = randInt(0, 11) * 5;
+    else m = (Math.random() < 0.5) ? 30 : 0;
+    const lbl = fmt(h, m);
+    if (lbl !== correctLabel) choices.add(lbl);
+  }
+  const arr = shuffle([...choices]);
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question">
+      <div class="prompt">現在是幾點？<button class="speak-btn" onclick="speak('${correctLabel}')">🔊</button></div>
+    </div>
+    ${clockSVG}
+    <div class="options" style="margin-top:20px;">
+      ${arr.map(c => `<button class="option-btn" style="font-size:20px;" onclick="checkClock(this, '${c}', '${correctLabel}')">${c}</button>`).join('')}
+    </div>`;
+}
+function checkClock(btn, choice, ans) {
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+  if (choice === ans) {
+    btn.classList.add('correct');
+    showAnswerReveal(true, `🕐 ${ans}`, () => speak(ans));
+    answerCorrect(`對！現在是${ans} 🕐`);
+  } else {
+    btn.classList.add('wrong');
+    showAnswerReveal(false, `🕐 ${ans}`, () => speak(ans));
+    answerWrong(`正確是${ans}喔`);
+  }
+}
+
+/* ===== C1-C3: 注音配對 ===== */
+function renderBopomofo() {
+  const set = game.level.set;
+  let pool;
+  if (set === 'sheng') pool = SHENG;
+  else if (set === 'yun') pool = YUN.filter(b => !JIE.includes(b));
+  else pool = JIE;
+  const ans = pool[randInt(0, pool.length-1)];
+  const allBopo = [...SHENG, ...YUN];
+  const distractors = shuffle(allBopo.filter(b => b !== ans)).slice(0,3);
+  const choices = shuffle([ans, ...distractors]);
+  const word = BOPO_SOUND[ans];
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question">
+      <div class="prompt">這個字「<span style="color:var(--red); font-size:30px;">${word}</span>」的注音是？<button class="speak-btn" onclick="speakBopo('${ans}')">🔊</button></div>
+    </div>
+    <div class="options">
+      ${choices.map(c => `<button class="option-btn" style="font-size:44px;" onclick="checkBopo(this, '${c}', '${ans}')">${c}</button>`).join('')}
+    </div>`;
+  setTimeout(() => speakBopo(ans), 500);
+}
+function checkBopo(btn, choice, ans) {
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+  const word = BOPO_SOUND[ans] || ans;
+  if (choice === ans) {
+    btn.classList.add('correct');
+    showAnswerReveal(true, `${ans} 念「<span style="color:var(--pink)">${word}</span>」`, () => speakBopo(ans));
+    answerCorrect(`對！${ans} 念「${word}」🎊`);
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.option-btn').forEach(b => { if (b.textContent === ans) b.classList.add('correct'); });
+    showAnswerReveal(false, `${ans} 念「<span style="color:var(--pink)">${word}</span>」`, () => speakBopo(ans));
+    answerWrong(`正確是 ${ans}（念「${word}」）`);
+  }
+}
+
+/* ===== C4: 聽音辨注音 ===== */
+function renderBopoListen() {
+  const allBopo = [...SHENG, ...YUN];
+  const ans = allBopo[randInt(0, allBopo.length-1)];
+  const distractors = shuffle(allBopo.filter(b => b !== ans)).slice(0,3);
+  const choices = shuffle([ans, ...distractors]);
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question">
+      <div class="prompt">聽聽看是哪個注音？</div>
+      <button class="speak-btn" style="width:80px; height:80px; font-size:36px;" onclick="speakBopo('${ans}')">🔊</button>
+      <div style="margin-top:6px; color:var(--brown); font-size:14px;">點喇叭聽聲音</div>
+    </div>
+    <div class="options">
+      ${choices.map(c => `<button class="option-btn" style="font-size:44px;" onclick="checkBopo(this, '${c}', '${ans}')">${c}</button>`).join('')}
+    </div>`;
+  setTimeout(() => speakBopo(ans), 500);
+}
+
+/* ===== C5: 四聲挑戰 ===== */
+function renderTones() {
+  const group = TONE_GROUPS[randInt(0, TONE_GROUPS.length-1)];
+  const toneIdx = randInt(0, 3);
+  const ans = group.words[toneIdx];
+  const bopo = group.base + TONE_MARKS[toneIdx];
+  const choices = shuffle(group.words.map((w,i) => ({ word: w, idx: i })));
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question">
+      <div class="prompt">聽聽看是哪一個聲調？</div>
+      <div class="bopomofo-display" style="font-size:70px;">${bopo}</div>
+      <button class="speak-btn" style="width:70px; height:70px; font-size:30px;" onclick="speak('${ans}')">🔊</button>
+    </div>
+    <div class="options">
+      ${choices.map(c => `<button class="option-btn" style="font-size:36px; padding:14px 8px;" onclick="checkTone(this, '${c.word}', '${ans}', ${c.idx}, ${toneIdx})">${c.word}<br><span style="font-size:13px; color:var(--brown); font-weight:normal;">${TONE_NAMES[c.idx]}</span></button>`).join('')}
+    </div>`;
+  setTimeout(() => speak(ans), 500);
+}
+function checkTone(btn, choice, ans, idx, ansIdx) {
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+  if (choice === ans) {
+    btn.classList.add('correct');
+    showAnswerReveal(true, `${ans}（${TONE_NAMES[idx]}）`, () => speak(ans));
+    answerCorrect(`對！${ans}（${TONE_NAMES[idx]}）🎵`);
+  } else {
+    btn.classList.add('wrong');
+    const aName = ansIdx !== undefined ? TONE_NAMES[ansIdx] : '';
+    showAnswerReveal(false, `${ans}${aName ? '（' + aName + '）' : ''}`, () => speak(ans));
+    answerWrong(`正確是 ${ans}`);
+  }
+}
+
+/* ===== C6: 注音拼字 ===== */
+function renderSpell() {
+  const bank = SPELL_BANK[game.level.pool] || SPELL_BANK.word;
+  const w = bank[randInt(0, bank.length-1)];
+  const distractorPool = [...new Set(bank.filter(x => x.bopo !== w.bopo).map(x => x.bopo))];
+  const distractors = shuffle(distractorPool).slice(0,3);
+  const choices = shuffle([w.bopo, ...distractors]);
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question">
+      <div class="prompt">「<span style="color:var(--red); font-size:46px; text-shadow:2px 2px 0 #fff;">${w.char}</span>」這個字的注音是？<button class="speak-btn" onclick="speak('${w.char}')">🔊</button></div>
+    </div>
+    <div class="options">
+      ${choices.map(c => `<button class="option-btn" style="font-size:34px;" onclick="checkSpell(this, '${c}', '${w.bopo}', '${w.char}')">${c}</button>`).join('')}
+    </div>`;
+  setTimeout(() => speak(w.char), 400);
+}
+function checkSpell(btn, choice, ans, char) {
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.add('disabled'));
+  const charLabel = char ? `「${char}」` : '';
+  if (choice === ans) {
+    btn.classList.add('correct');
+    showAnswerReveal(true, `${ans}${charLabel ? ' = ' + charLabel : ''}`, () => char ? speak(char) : speak(ans));
+    answerCorrect(`對！注音是 ${ans} 📝`);
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.option-btn').forEach(b => { if (b.textContent === ans) b.classList.add('correct'); });
+    showAnswerReveal(false, `${ans}${charLabel ? ' = ' + charLabel : ''}`, () => char ? speak(char) : speak(ans));
+    answerWrong(`正確是 ${ans}`);
+  }
+}
+
+/* ===== C7: 形音配對 ===== */
+function renderCharMatch() {
+  const picks = pickRandom(CHAR_MATCH, 4);
+  const leftItems = picks.map(p => ({ key: p.char, text: p.char }));
+  const rightItems = shuffle(picks).map(p => ({ key: p.char, text: p.bopo }));
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question">
+      <div class="prompt">把國字和注音配對起來！<button class="speak-btn" onclick="speak('把國字和注音配對起來')">🔊</button></div>
+    </div>
+    <div class="match-grid">
+      <div class="match-col" id="matchLeft"></div>
+      <div class="match-col" id="matchRight"></div>
+    </div>`;
+  const leftEl = document.getElementById('matchLeft');
+  const rightEl = document.getElementById('matchRight');
+  leftItems.forEach(it => {
+    const d = document.createElement('div');
+    d.className = 'match-item';
+    d.style.fontSize = '34px';
+    d.textContent = it.text;
+    d.dataset.key = it.key;
+    d.dataset.side = 'L';
+    d.onclick = () => matchClick(d, false);
+    leftEl.appendChild(d);
+  });
+  rightItems.forEach(it => {
+    const d = document.createElement('div');
+    d.className = 'match-item';
+    d.style.fontSize = '26px';
+    d.textContent = it.text;
+    d.dataset.key = it.key;
+    d.dataset.side = 'R';
+    d.onclick = () => matchClick(d, false);
+    rightEl.appendChild(d);
+  });
+  matchSelected = null;
+  game.matchTotal = 4;
+  game.matchDone = 0;
+}
+
+/* ===== M9: 比大小 ===== */
+function renderCompare() {
+  let a = randInt(1, 20), b = randInt(1, 20);
+  while (a === b) b = randInt(1, 20);
+  const askBig = Math.random() < 0.5;
+  const ans = askBig ? Math.max(a,b) : Math.min(a,b);
+  const word = askBig ? '大' : '小';
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question">
+      <div class="prompt">哪個數字比較<span style="color:var(--red); font-size:28px;">${word}</span>？<button class="speak-btn" onclick="speak('哪個數字比較${word}')">🔊</button></div>
+    </div>
+    <div class="options" style="grid-template-columns:1fr 1fr; max-width:420px; margin:20px auto 0;">
+      ${[a,b].map(n => `<button class="option-btn" style="font-size:48px; padding:28px 10px;" data-val="${n}" onclick="checkGeneric(this, ${n}, ${ans}, '${ans}（${numberToZh(ans)}）', '${numberToZh(ans)}', '對！${ans} 比較${word} 🎉', '正確是 ${ans}')">${n}</button>`).join('')}
+    </div>`;
+}
+
+/* ===== M11: 單數雙數 ===== */
+function renderOddEven() {
+  const n = randInt(1, 20);
+  const isEven = n % 2 === 0;
+  const ans = isEven ? '雙數' : '單數';
+  let dots = '';
+  for (let i=0; i<n; i++) {
+    const gap = (i % 2 === 1) ? 'margin-right:14px;' : 'margin-right:2px;';
+    dots += `<span class="item" style="font-size:30px; ${gap}">🔵</span>`;
+  }
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question">
+      <div class="prompt"><span style="color:var(--red); font-size:34px;">${n}</span> 是單數還是雙數？<button class="speak-btn" onclick="speak('${n}，是單數還是雙數')">🔊</button></div>
+      <div style="font-size:13px; color:var(--brown); margin-top:4px;">提示：兩個兩個圈起來，剛好分完是雙數</div>
+    </div>
+    <div class="counting-area">${dots}</div>
+    <div class="options" style="grid-template-columns:1fr 1fr; max-width:380px; margin:0 auto;">
+      <button class="option-btn" style="font-size:26px;" data-val="單數" onclick="checkGeneric(this, '單數', '${ans}', '${n} 是${ans}', '${ans}', '答對了！是${ans} 🎉', '正確是${ans}')">單數</button>
+      <button class="option-btn" style="font-size:26px;" data-val="雙數" onclick="checkGeneric(this, '雙數', '${ans}', '${n} 是${ans}', '${ans}', '答對了！是${ans} 🎉', '正確是${ans}')">雙數</button>
+    </div>`;
+}
+
+/* ===== M12: 立體王國 ===== */
+function renderShapes3d() {
+  const ans = SHAPES3D[randInt(0, SHAPES3D.length-1)];
+  const choices = shuffle(SHAPES3D.slice());
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question">
+      <div class="prompt">這是什麼立體形狀？<button class="speak-btn" onclick="speak('這是什麼立體形狀')">🔊</button></div>
+    </div>
+    <div style="font-size:120px; text-align:center; margin:16px 0;">${ans.emoji}</div>
+    <div class="options" style="grid-template-columns:1fr 1fr;">
+      ${choices.map(c => `<button class="option-btn" style="font-size:22px;" data-val="${c.name}" onclick="checkGeneric(this, '${c.name}', '${ans.name}', '${ans.emoji} ${ans.name}', '${ans.name}', '對！這是${ans.name} 🎊', '正確是${ans.name}')">${c.name}</button>`).join('')}
+    </div>`;
+  setTimeout(() => speak(ans.name), 400);
+}
+
+/* ===== M13: 比長短 ===== */
+function renderLength() {
+  const w1 = randInt(20, 95);
+  let w2 = randInt(20, 95);
+  while (Math.abs(w1 - w2) < 18) w2 = randInt(20, 95);
+  const askLong = Math.random() < 0.5;
+  const ans = askLong ? (w1 > w2 ? '1' : '2') : (w1 < w2 ? '1' : '2');
+  const word = askLong ? '長' : '短';
+  const bar = (w, color, label) => `
+    <div style="display:flex; align-items:center; gap:10px; margin:14px 0;">
+      <span style="font-size:24px; width:34px;">${label}</span>
+      <div style="height:34px; width:${w}%; background:${color}; border:3px solid var(--dark); border-radius:8px;"></div>
+    </div>`;
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question">
+      <div class="prompt">哪一條比較<span style="color:var(--red); font-size:28px;">${word}</span>？<button class="speak-btn" onclick="speak('哪一條比較${word}')">🔊</button></div>
+    </div>
+    <div style="padding:10px 4px;">
+      ${bar(w1, 'var(--teal)', '①')}
+      ${bar(w2, 'var(--pink)', '②')}
+    </div>
+    <div class="options" style="grid-template-columns:1fr 1fr; max-width:360px; margin:6px auto 0;">
+      <button class="option-btn" style="font-size:34px;" data-val="1" onclick="checkGeneric(this, '1', '${ans}', '第 ${ans} 條比較${word}', '第${ans}條比較${word}', '答對了！🎉', '正確是第 ${ans} 條')">①</button>
+      <button class="option-btn" style="font-size:34px;" data-val="2" onclick="checkGeneric(this, '2', '${ans}', '第 ${ans} 條比較${word}', '第${ans}條比較${word}', '答對了！🎉', '正確是第 ${ans} 條')">②</button>
+    </div>`;
+}
+
+/* ===== M14: 認錢幣 ===== */
+function renderMoney() {
+  const denoms = game.level.denoms || [1, 5, 10];
+  const coins = [];
+  const count = randInt(2, 4);
+  for (let i=0; i<count; i++) coins.push(denoms[randInt(0, denoms.length-1)]);
+  const total = coins.reduce((a,b)=>a+b, 0);
+  const choices = new Set([total]);
+  while (choices.size < 4) {
+    const cand = total + randInt(-5, 6);
+    if (cand > 0 && cand !== total) choices.add(cand);
+  }
+  const arr = shuffle([...choices]);
+  const coinHTML = coins.map(v => `<span style="display:inline-flex; align-items:center; justify-content:center; width:60px; height:60px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #FFE082, #C8A415); border:3px solid #8a6d10; font-size:22px; font-weight:bold; color:#5a4a00; margin:5px;">${v}</span>`).join('');
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question">
+      <div class="prompt">一共有多少元？<button class="speak-btn" onclick="speak('一共有多少元')">🔊</button></div>
+    </div>
+    <div class="counting-area" style="background:linear-gradient(180deg,#FFF8E7,#FFE8B0);">${coinHTML}</div>
+    <div class="options">
+      ${arr.map(c => `<button class="option-btn" data-val="${c}" onclick="checkGeneric(this, ${c}, ${total}, '${total} 元', '${numberToZh(total)}元', '對！一共 ${total} 元 💰', '正確是 ${total} 元')">${c} 元</button>`).join('')}
+    </div>`;
+}
+
+/* ========== 二年級題庫與遊戲 ========== */
+const MC_BANKS = {
+  radical: [
+    {q:'「江」的部首是哪一個？', a:'氵', say:'江', opts:['氵','工','水','彳']},
+    {q:'「花」的部首是哪一個？', a:'艹', say:'花', opts:['艹','化','宀','匕']},
+    {q:'「媽」的部首是哪一個？', a:'女', say:'媽', opts:['女','馬','子','安']},
+    {q:'「林」的部首是哪一個？', a:'木', say:'林', opts:['木','土','禾','竹']},
+    {q:'「想」的部首是哪一個？', a:'心', say:'想', opts:['心','木','目','相']},
+    {q:'「說」的部首是哪一個？', a:'言', say:'說', opts:['言','兌','口','立']},
+    {q:'「們」的部首是哪一個？', a:'人', say:'們', opts:['人','門','彳','宀']},
+    {q:'「朋」的部首是哪一個？', a:'月', say:'朋', opts:['月','力','日','二']},
+    {q:'「跑」的部首是哪一個？', a:'足', say:'跑', opts:['足','包','走','力']},
+    {q:'「草」的部首是哪一個？', a:'艹', say:'草', opts:['艹','早','日','十']}
+  ],
+  measure: [
+    {q:'一（ ）小狗，要用哪個量詞？', a:'隻', opts:['隻','條','本','顆']},
+    {q:'一（ ）魚，要用哪個量詞？', a:'條', opts:['條','隻','張','朵']},
+    {q:'一（ ）書，要用哪個量詞？', a:'本', opts:['本','枝','片','粒']},
+    {q:'一（ ）花，要用哪個量詞？', a:'朵', opts:['朵','隻','台','雙']},
+    {q:'一（ ）鞋子，要用哪個量詞？', a:'雙', opts:['雙','個','根','本']},
+    {q:'一（ ）汽車，要用哪個量詞？', a:'輛', opts:['輛','隻','本','片']},
+    {q:'一（ ）紙，要用哪個量詞？', a:'張', opts:['張','條','顆','隻']},
+    {q:'一（ ）牛，要用哪個量詞？', a:'頭', opts:['頭','隻','條','枝']},
+    {q:'一（ ）鉛筆，要用哪個量詞？', a:'枝', opts:['枝','本','台','片']},
+    {q:'一（ ）大樹，要用哪個量詞？', a:'棵', opts:['棵','頭','張','本']}
+  ],
+  antonym: [
+    {q:'「大」的相反詞是？', a:'小', opts:['小','多','高','長']},
+    {q:'「高」的相反詞是？', a:'矮', opts:['矮','胖','短','低']},
+    {q:'「上」的相反詞是？', a:'下', opts:['下','左','前','旁']},
+    {q:'「多」的相反詞是？', a:'少', opts:['少','大','重','高']},
+    {q:'「黑」的相反詞是？', a:'白', opts:['白','紅','亮','暗']},
+    {q:'「快」的相反詞是？', a:'慢', opts:['慢','急','停','跑']},
+    {q:'「長」的相反詞是？', a:'短', opts:['短','高','大','粗']},
+    {q:'「冷」的相反詞是？', a:'熱', opts:['熱','涼','冰','溫']},
+    {q:'「開」的相反詞是？', a:'關', opts:['關','門','鎖','停']},
+    {q:'「哭」的相反詞是？', a:'笑', opts:['笑','叫','鬧','跑']},
+    {q:'「前」的相反詞是？', a:'後', opts:['後','左','右','旁']},
+    {q:'「胖」的相反詞是？', a:'瘦', opts:['瘦','矮','小','輕']}
+  ],
+  synonym: [
+    {q:'「高興」意思相近的是？', a:'快樂', opts:['快樂','生氣','難過','害怕']},
+    {q:'「漂亮」意思相近的是？', a:'美麗', opts:['美麗','醜陋','普通','奇怪']},
+    {q:'「馬上」意思相近的是？', a:'立刻', opts:['立刻','慢慢','後來','等等']},
+    {q:'「仔細」意思相近的是？', a:'認真', opts:['認真','馬虎','隨便','偷懶']},
+    {q:'「寒冷」意思相近的是？', a:'冰冷', opts:['冰冷','溫暖','炎熱','涼快']},
+    {q:'「開心」意思相近的是？', a:'快樂', opts:['快樂','傷心','緊張','疲倦']},
+    {q:'「整潔」意思相近的是？', a:'乾淨', opts:['乾淨','骯髒','破舊','普通']},
+    {q:'「勇敢」意思相近的是？', a:'大膽', opts:['大膽','膽小','害怕','緊張']}
+  ],
+  punct: [
+    {q:'「你好嗎__」應該填什麼標點？', a:'？', say:'問號', opts:['？','。','，','！']},
+    {q:'「我喜歡畫畫__」應該填什麼標點？', a:'。', say:'句號', opts:['。','？','！','、']},
+    {q:'「哇，好漂亮__」應該填什麼標點？', a:'！', say:'驚嘆號', opts:['！','。','？','，']},
+    {q:'「你叫什麼名字__」應該填什麼標點？', a:'？', say:'問號', opts:['？','。','！','，']},
+    {q:'「小心，有車__」應該填什麼標點？', a:'！', say:'驚嘆號', opts:['！','。','，','？']},
+    {q:'「今天天氣很好__」應該填什麼標點？', a:'。', say:'句號', opts:['。','？','！','、']},
+    {q:'句子中間要停頓，常用哪個標點？', a:'，', say:'逗號', opts:['，','。','？','！']}
+  ],
+  homophone: [
+    {q:'「__園」（ㄍㄨㄥ）是哪個字？', a:'公', opts:['公','工','弓','宮']},
+    {q:'「我__家」（ㄗㄞˋ）是哪個字？', a:'在', opts:['在','再','載','栽']},
+    {q:'「看__了」（ㄐㄧㄢˋ）是哪個字？', a:'見', opts:['見','建','件','箭']},
+    {q:'「__蕉」（ㄒㄧㄤ）是哪個字？', a:'香', opts:['香','箱','鄉','相']},
+    {q:'「老__」（ㄕ）是哪個字？', a:'師', opts:['師','濕','獅','詩']},
+    {q:'「__天」（ㄐㄧㄣ，今天）是哪個字？', a:'今', opts:['今','金','斤','巾']}
+  ],
+  similar: [
+    {q:'「太陽」的「太」是哪個字？', a:'太', opts:['太','大','犬','天']},
+    {q:'「進__口」（走進去）是哪個字？', a:'入', opts:['入','人','八','大']},
+    {q:'「眼__」（看東西）是哪個字？', a:'目', opts:['目','日','自','且']},
+    {q:'「__頭」（樹做的）是哪個字？', a:'木', opts:['木','本','禾','米']},
+    {q:'「__鴉」（黑色的鳥）是哪個字？', a:'烏', opts:['烏','鳥','鳴','島']},
+    {q:'「__萬」（很多）是哪個字？', a:'千', opts:['千','干','于','士']}
+  ],
+  wordbuild: [
+    {q:'「朋」可以組成哪個語詞？', a:'朋友', opts:['朋友','朋天','朋水','朋手']},
+    {q:'「學」可以組成哪個語詞？', a:'學校', opts:['學校','學雨','學魚','學手']},
+    {q:'「吃」可以組成哪個語詞？', a:'吃飯', opts:['吃飯','吃雲','吃石','吃天']},
+    {q:'「下」可以組成哪個語詞？', a:'下雨', opts:['下雨','下魚','下石','下火']},
+    {q:'「老」可以組成哪個語詞？', a:'老師', opts:['老師','老雨','老石','老魚']},
+    {q:'「白」可以組成哪個語詞？', a:'白雲', opts:['白雲','白魚','白石','白風']}
+  ],
+  lengthUnit: [
+    {q:'量「鉛筆」的長度，用什麼單位？', a:'公分', opts:['公分','公尺','公斤','公升']},
+    {q:'量「教室」的長度，用什麼單位？', a:'公尺', opts:['公尺','公分','公克','秒']},
+    {q:'1 公尺等於幾公分？', a:'100', opts:['100','10','1000','50']},
+    {q:'量「身高」常用什麼單位？', a:'公分', opts:['公分','公升','公克','元']},
+    {q:'量「操場跑道」的長度，用什麼單位？', a:'公尺', opts:['公尺','公分','毫米','克']},
+    {q:'哪一個比較長？', a:'1 公尺', opts:['1 公尺','90 公分']}
+  ],
+  polygon: [
+    {q:'三角形有幾個邊？', a:'3', opts:['3','4','5','6']},
+    {q:'正方形有幾個角？', a:'4', opts:['4','3','5','6']},
+    {q:'長方形有幾個邊？', a:'4', opts:['4','3','5','2']},
+    {q:'哪個圖形有 3 個邊？', a:'三角形', opts:['三角形','正方形','圓形','長方形']},
+    {q:'圓形有幾個角？', a:'0', opts:['0','1','3','4']},
+    {q:'五邊形有幾個邊？', a:'5', opts:['5','4','6','3']}
+  ],
+  time3: [
+    {q:'1 分等於幾秒？', a:'60', opts:['60','100','30','24']},
+    {q:'1 小時等於幾分？', a:'60', opts:['60','100','30','24']},
+    {q:'1 天有幾個小時？', a:'24', opts:['24','12','60','30']},
+    {q:'半小時是幾分？', a:'30', opts:['30','15','60','45']},
+    {q:'從 3 點到 4 點，經過多久？', a:'1 小時', opts:['1 小時','30 分','2 小時','15 分']},
+    {q:'90 分等於幾小時幾分？', a:'1 小時 30 分', opts:['1 小時 30 分','1 小時','2 小時','9 小時']}
+  ],
+  units3: [
+    {q:'量「鉛筆的厚度」用什麼單位？', a:'毫米', opts:['毫米','公里','公斤','公升']},
+    {q:'量「兩個城市的距離」用什麼單位？', a:'公里', opts:['公里','公分','毫米','公克']},
+    {q:'秤「一袋米」的重量用什麼單位？', a:'公斤', opts:['公斤','公升','公分','秒']},
+    {q:'秤「一顆糖果」的重量用什麼單位？', a:'公克', opts:['公克','公斤','公尺','公升']},
+    {q:'裝「一瓶水」有多少，用什麼單位？', a:'公升', opts:['公升','公斤','公分','公里']},
+    {q:'1 公斤等於幾公克？', a:'1000', opts:['1000','100','10','500']},
+    {q:'1 公里等於幾公尺？', a:'1000', opts:['1000','100','10','500']}
+  ],
+  metaphor: [
+    {q:'哪一句是譬喻句？', a:'月亮像一艘小船。', opts:['月亮像一艘小船。','月亮升起來了。','今晚有月亮。','我看著月亮。']},
+    {q:'「她的臉紅得像蘋果」用了什麼修辭？', a:'譬喻', opts:['譬喻','擬人','誇飾','排比']},
+    {q:'哪一句是譬喻句？', a:'棉花糖像白雲一樣軟。', opts:['棉花糖像白雲一樣軟。','我吃了棉花糖。','棉花糖很甜。','棉花糖是白色的。']},
+    {q:'譬喻句裡常出現哪個字？', a:'像', opts:['像','跑','吃','和']},
+    {q:'「彎彎的月亮好像香蕉」是什麼修辭？', a:'譬喻', opts:['譬喻','擬人','設問','類疊']},
+    {q:'哪一句是譬喻？', a:'雪花如棉絮般飄下。', opts:['雪花如棉絮般飄下。','下雪了。','雪是冷的。','我喜歡雪。']}
+  ],
+  personify: [
+    {q:'哪一句是擬人句？', a:'小花對我點點頭。', opts:['小花對我點點頭。','小花開了。','小花很漂亮。','我種了小花。']},
+    {q:'「風兒唱著歌」用了什麼修辭？', a:'擬人', opts:['擬人','譬喻','誇飾','排比']},
+    {q:'哪一句是擬人句？', a:'太陽公公露出笑臉。', opts:['太陽公公露出笑臉。','太陽出來了。','太陽很大。','我看見太陽。']},
+    {q:'擬人法是把什麼當作人來寫？', a:'東西或動物', opts:['東西或動物','數字','顏色','聲音']},
+    {q:'哪一句是擬人句？', a:'柳樹在風中跳舞。', opts:['柳樹在風中跳舞。','柳樹很高。','柳樹是綠色的。','我爬上柳樹。']},
+    {q:'「鬧鐘生氣地叫起來」是什麼修辭？', a:'擬人', opts:['擬人','譬喻','設問','誇飾']}
+  ],
+  rhetoric: [
+    {q:'「白髮三千丈」用了什麼修辭？', a:'誇飾', opts:['誇飾','擬人','譬喻','排比']},
+    {q:'「藍藍的天、綠綠的草、紅紅的花」用了什麼？', a:'類疊', opts:['類疊','誇飾','設問','譬喻']},
+    {q:'「你知道嗎？這就是答案。」用了什麼？', a:'設問', opts:['設問','擬人','誇飾','排比']},
+    {q:'「他跑得比飛機還快」是什麼修辭？', a:'誇飾', opts:['誇飾','擬人','類疊','排比']},
+    {q:'把結構相同的句子排在一起，叫什麼？', a:'排比', opts:['排比','誇飾','設問','譬喻']}
+  ],
+  idiom: [
+    {q:'形容很開心，可以用哪個成語？', a:'眉開眼笑', opts:['眉開眼笑','垂頭喪氣','大發雷霆','愁眉苦臉']},
+    {q:'「一（ ）二鳥」要填哪個字？', a:'箭', opts:['箭','石','刀','弓']},
+    {q:'「（ ）中送炭」要填哪個字？', a:'雪', opts:['雪','雨','風','火']},
+    {q:'形容人很多，用哪個成語？', a:'人山人海', opts:['人山人海','三三兩兩','空無一人','小貓兩三隻']},
+    {q:'「（ ）到成功」要填哪個字？', a:'馬', opts:['馬','牛','羊','虎']},
+    {q:'形容很努力用功，用哪個成語？', a:'專心一意', opts:['專心一意','三心二意','馬馬虎虎','心不在焉']}
+  ],
+  punct3: [
+    {q:'要列舉並排的東西，中間常用哪個標點？', a:'、', say:'頓號', opts:['、','。','？','！']},
+    {q:'寫出說話的內容，前後常用哪個標點？', a:'「」', say:'引號', opts:['「」','（）','……','、']},
+    {q:'說明、解釋後面要接內容，常用哪個標點？', a:'：', say:'冒號', opts:['：','、','？','！']},
+    {q:'「我喜歡蘋果（ ）香蕉和橘子」填什麼？', a:'、', say:'頓號', opts:['、','。','！','？']},
+    {q:'「老師說（ ）上課了。」括號填什麼？', a:'：', say:'冒號', opts:['：','，','、','？']}
+  ],
+  sentence: [
+    {q:'「（ ）下雨，（ ）我帶傘。」填哪一組？', a:'因為…所以', opts:['因為…所以','雖然…但是','一邊…一邊','不但…而且']},
+    {q:'「（ ）很累，（ ）他不放棄。」填哪一組？', a:'雖然…但是', opts:['雖然…但是','因為…所以','如果…就','越…越']},
+    {q:'「他（ ）唱歌（ ）跳舞。」填哪一組？', a:'一邊…一邊', opts:['一邊…一邊','因為…所以','雖然…但是','如果…就']},
+    {q:'「（ ）明天放晴，我們（ ）去公園。」', a:'如果…就', opts:['如果…就','雖然…但是','因為…所以','不但…而且']},
+    {q:'「他（ ）功課好（ ）很有禮貌。」', a:'不但…而且', opts:['不但…而且','雖然…但是','如果…就','因為…所以']}
+  ],
+  multiword: [
+    {q:'「明亮」的「明」也出現在下列哪個詞？', a:'明天', opts:['明天','名字','命令','迷路']},
+    {q:'下列哪一個是「水果」？', a:'葡萄', opts:['葡萄','蘿蔔','青菜','米飯']},
+    {q:'「開車」和「開門」的「開」表示什麼？', a:'操作或打開', opts:['操作或打開','關起來','睡覺','吃飯']},
+    {q:'「花」可以是花朵，也可以是？', a:'花錢', opts:['花錢','下雨','跑步','睡覺']},
+    {q:'哪個詞和「高興」意思最接近？', a:'快樂', opts:['快樂','生氣','害怕','難過']}
+  ],
+  reading: [
+    {passage:'小明早上起床，看見窗外下著大雨。他帶了雨傘去上學，路上遇到沒帶傘的同學小華，就和他一起撐傘。', q:'小明為什麼帶雨傘？', a:'因為下大雨', opts:['因為下大雨','因為天氣很熱','因為要去公園','因為老師規定']},
+    {passage:'小明早上起床，看見窗外下著大雨。他帶了雨傘去上學，路上遇到沒帶傘的同學小華，就和他一起撐傘。', q:'小明遇到小華時做了什麼？', a:'和他一起撐傘', opts:['和他一起撐傘','跑走了','借他外套','沒有理他']},
+    {passage:'蜜蜂是勤勞的昆蟲。牠們在花叢中飛來飛去，採集花蜜，再回到蜂巢做成蜂蜜。蜜蜂也幫忙花朵傳播花粉。', q:'蜜蜂回到蜂巢做什麼？', a:'做成蜂蜜', opts:['做成蜂蜜','睡覺','蓋房子','找水喝']},
+    {passage:'蜜蜂是勤勞的昆蟲。牠們在花叢中飛來飛去，採集花蜜，再回到蜂巢做成蜂蜜。蜜蜂也幫忙花朵傳播花粉。', q:'這段主要在說什麼？', a:'蜜蜂的工作', opts:['蜜蜂的工作','花的顏色','下雨天','蜂巢的形狀']},
+    {passage:'秋天到了，樹葉慢慢變黃，一片片從樹上落下來。小朋友在公園裡撿落葉，做成美麗的書籤。', q:'樹葉在秋天有什麼變化？', a:'變黃並落下', opts:['變黃並落下','變得更綠','開出花朵','結出果實']},
+    {passage:'秋天到了，樹葉慢慢變黃，一片片從樹上落下來。小朋友在公園裡撿落葉，做成美麗的書籤。', q:'小朋友用落葉做什麼？', a:'書籤', opts:['書籤','風箏','帽子','鞋子']}
+  ],
+  plant: [
+    {q:'植物用哪個部位吸收水分？', a:'根', opts:['根','葉','花','果實']},
+    {q:'植物製造養分主要靠哪個部位？', a:'葉', opts:['葉','根','莖','種子']},
+    {q:'種子發芽長大後會變成什麼？', a:'新的植物', opts:['新的植物','石頭','動物','水']},
+    {q:'花謝了之後可能會結出什麼？', a:'果實', opts:['果實','葉子','根','花瓣']},
+    {q:'植物生長需要哪些東西？', a:'陽光、水和空氣', opts:['陽光、水和空氣','糖果','電視','玩具']},
+    {q:'哪個部位把水分和養分送到全身？', a:'莖', opts:['莖','花','果實','種子']}
+  ],
+  animal: [
+    {q:'昆蟲的身體分成哪三部分？', a:'頭、胸、腹', opts:['頭、胸、腹','頭、手、腳','根、莖、葉','頭、尾、鰭']},
+    {q:'昆蟲有幾隻腳？', a:'6 隻', opts:['6 隻','4 隻','8 隻','2 隻']},
+    {q:'蝴蝶小時候是什麼？', a:'毛毛蟲', opts:['毛毛蟲','小鳥','小魚','蝌蚪']},
+    {q:'青蛙小時候是什麼？', a:'蝌蚪', opts:['蝌蚪','毛毛蟲','小雞','幼蟲']},
+    {q:'下列哪一種動物會飛？', a:'麻雀', opts:['麻雀','金魚','烏龜','螞蟻']},
+    {q:'魚用什麼呼吸？', a:'鰓', opts:['鰓','肺','皮膚','鼻子']}
+  ],
+  magnet: [
+    {q:'磁鐵可以吸住下列哪一個？', a:'鐵釘', opts:['鐵釘','塑膠尺','木筷','紙張']},
+    {q:'一個磁鐵有幾個磁極？', a:'2 個', opts:['2 個','1 個','3 個','4 個']},
+    {q:'兩個磁鐵的「同極」靠近會怎樣？', a:'互相排斥', opts:['互相排斥','互相吸引','沒有反應','變大']},
+    {q:'兩個磁鐵的「異極」靠近會怎樣？', a:'互相吸引', opts:['互相吸引','互相排斥','爆炸','消失']},
+    {q:'磁鐵哪裡的磁力最強？', a:'兩端的磁極', opts:['兩端的磁極','正中間','整個一樣','看不出來']},
+    {q:'下列哪個不會被磁鐵吸住？', a:'橡皮擦', opts:['橡皮擦','迴紋針','鐵湯匙','鐵釘']}
+  ],
+  weather: [
+    {q:'我們呼吸需要空氣中的什麼？', a:'氧氣', opts:['氧氣','沙子','糖','石頭']},
+    {q:'風是什麼流動形成的？', a:'空氣', opts:['空氣','水','土','火']},
+    {q:'量氣溫要用什麼工具？', a:'溫度計', opts:['溫度計','尺','體重計','時鐘']},
+    {q:'天空烏雲密布，可能快要？', a:'下雨', opts:['下雨','出大太陽','放晴','變熱']},
+    {q:'風可以讓下列哪個動起來？', a:'風車', opts:['風車','大石頭','房子','大樹幹']},
+    {q:'空氣會佔有空間嗎？', a:'會', opts:['會','不會','看不到就沒有','只有風才有']}
+  ],
+  water: [
+    {q:'水結冰會變成什麼？', a:'固體（冰）', opts:['固體（冰）','氣體','消失','石頭']},
+    {q:'水加熱會變成什麼？', a:'水蒸氣', opts:['水蒸氣','冰','土','油']},
+    {q:'下列哪一個是液體？', a:'果汁', opts:['果汁','石頭','冰塊','木頭']},
+    {q:'下列哪一個是固體？', a:'積木', opts:['積木','水','牛奶','空氣']},
+    {q:'冰放在溫暖的房間會怎樣？', a:'融化成水', opts:['融化成水','變更硬','不見了','變成糖']},
+    {q:'水有固定的形狀嗎？', a:'沒有，會隨容器改變', opts:['沒有，會隨容器改變','有固定形狀','永遠是方形','永遠是圓形']}
+  ],
+  light: [
+    {q:'影子是怎麼形成的？', a:'光被擋住', opts:['光被擋住','風吹來','天氣冷','地面濕']},
+    {q:'晚上沒有太陽，可以用什麼照明？', a:'電燈', opts:['電燈','冰塊','石頭','風扇']},
+    {q:'下列哪一個會自己發光？', a:'太陽', opts:['太陽','月亮','鏡子','桌子']},
+    {q:'影子會出現在光的哪一邊？', a:'背對光的另一邊', opts:['背對光的另一邊','正對光那邊','正上方','看不出來']},
+    {q:'光前進的路線是？', a:'直線', opts:['直線','彎曲','繞圈','隨便亂走']},
+    {q:'中午太陽在頭頂時，影子會？', a:'最短', opts:['最短','最長','不見','變彩色']}
+  ]
+};
+
+/* 二年級：通用選擇題 */
+function renderMC() {
+  const bank = MC_BANKS[game.level.bank] || [];
+  const item = bank[randInt(0, bank.length-1)];
+  const opts = shuffle(item.opts.slice());
+  const say = item.say || item.a;
+  const passage = item.passage ? `<div style="background:#fff; border:3px solid var(--dark); border-radius:16px; padding:14px 16px; margin-bottom:14px; font-size:17px; line-height:1.85; text-align:left;">📖 ${item.passage}</div>` : '';
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question">
+      ${passage}
+      <div class="prompt">${item.q}<button class="speak-btn" onclick="speak('${item.say || item.q}')">🔊</button></div>
+    </div>
+    <div class="options" style="grid-template-columns:1fr 1fr;">
+      ${opts.map(o => `<button class="option-btn" style="font-size:24px;" data-val="${o}" onclick="checkGeneric(this, '${o}', '${item.a}', '${item.a}', '${say}', '答對了！🎉', '正確答案是 ${item.a}')">${o}</button>`).join('')}
+    </div>`;
+}
+
+/* 二年級：二位數進位加法 */
+function renderBigAdd() {
+  let a = randInt(13, 79);
+  let b = randInt(11, 99 - a);
+  if (b < 11) { a = randInt(13, 60); b = randInt(11, 99 - a); }
+  const ans = a + b;
+  const set = new Set([ans]);
+  while (set.size < 4) { const c = ans + randInt(-9, 9); if (c > 0 && c <= 99 && c !== ans) set.add(c); }
+  const arr = shuffle([...set]);
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question"><div class="prompt">算算看是多少？<button class="speak-btn" onclick="speak('${a} 加 ${b} 等於多少')">🔊</button></div></div>
+    <div class="big-display" style="font-size:58px;">${a} + ${b} = ?</div>
+    <div class="options">${arr.map(c => `<button class="option-btn" data-val="${c}" onclick="checkMathAns(this, ${c}, ${ans})">${c}</button>`).join('')}</div>`;
+}
+
+/* 二年級：二位數退位減法 */
+function renderBigSub() {
+  const a = randInt(25, 99);
+  const b = randInt(11, a - 1);
+  const ans = a - b;
+  const set = new Set([ans]);
+  while (set.size < 4) { const c = ans + randInt(-9, 9); if (c >= 0 && c <= 99 && c !== ans) set.add(c); }
+  const arr = shuffle([...set]);
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question"><div class="prompt">算算看還剩多少？<button class="speak-btn" onclick="speak('${a} 減 ${b} 等於多少')">🔊</button></div></div>
+    <div class="big-display" style="font-size:58px;">${a} − ${b} = ?</div>
+    <div class="options">${arr.map(c => `<button class="option-btn" data-val="${c}" onclick="checkMathAns(this, ${c}, ${ans})">${c}</button>`).join('')}</div>`;
+}
+
+/* 二年級：九九乘法 */
+function renderMultiply() {
+  const table = game.level.table || [2,3,4,5];
+  const a = table[randInt(0, table.length-1)];
+  const b = randInt(1, 9);
+  const ans = a * b;
+  const set = new Set([ans]);
+  while (set.size < 4) {
+    const deltas = [a, -a, b, -b, a+b, -1, 1];
+    const c = ans + deltas[randInt(0, deltas.length-1)];
+    if (c > 0 && c !== ans) set.add(c);
+  }
+  const arr = shuffle([...set]);
+  let grid = '';
+  if (a * b <= 30) {
+    for (let r=0; r<a; r++) { grid += '<div style="display:flex; gap:4px; justify-content:center;">'; for (let col=0; col<b; col++) grid += '<span style="font-size:20px;">🔵</span>'; grid += '</div>'; }
+  }
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question"><div class="prompt">算算看是多少？<button class="speak-btn" onclick="speak('${a} 乘 ${b} 等於多少')">🔊</button></div></div>
+    ${grid ? `<div class="counting-area" style="flex-direction:column; gap:4px;">${grid}</div>` : ''}
+    <div class="big-display" style="font-size:58px;">${a} × ${b} = ?</div>
+    <div class="options">${arr.map(c => `<button class="option-btn" data-val="${c}" onclick="checkMathAns(this, ${c}, ${ans})">${c}</button>`).join('')}</div>`;
+}
+
+/* 二年級：位值（合起來是多少） */
+function renderReadBig() {
+  const h = randInt(1, 9), t = randInt(0, 9), o = randInt(0, 9);
+  const ans = h*100 + t*10 + o;
+  const set = new Set([ans]);
+  while (set.size < 4) {
+    const c = ans + [randInt(-3,3)*100, randInt(-5,5)*10, randInt(-9,9)][randInt(0,2)];
+    if (c > 0 && c < 1000 && c !== ans) set.add(c);
+  }
+  const arr = shuffle([...set]).slice(0,4);
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question"><div class="prompt">${h} 個百、${t} 個十、${o} 個一，合起來是多少？<button class="speak-btn" onclick="speak('${h}個百，${t}個十，${o}個一，合起來是多少')">🔊</button></div></div>
+    <div class="options">${arr.map(c => `<button class="option-btn" data-val="${c}" onclick="checkGeneric(this, ${c}, ${ans}, '${ans}', '${ans}', '對！是 ${ans} 🎉', '正確是 ${ans}')">${c}</button>`).join('')}</div>`;
+}
+
+/* 二年級：三位數比大小 */
+function renderCompareBig() {
+  const cr = game.level.range || [100, 999];
+  let a = randInt(cr[0], cr[1]), b = randInt(cr[0], cr[1]);
+  while (a === b) b = randInt(cr[0], cr[1]);
+  const askBig = Math.random() < 0.5;
+  const ans = askBig ? Math.max(a,b) : Math.min(a,b);
+  const word = askBig ? '大' : '小';
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question"><div class="prompt">哪個數字比較<span style="color:var(--red); font-size:28px;">${word}</span>？<button class="speak-btn" onclick="speak('哪個數字比較${word}')">🔊</button></div></div>
+    <div class="options" style="grid-template-columns:1fr 1fr; max-width:440px; margin:20px auto 0;">
+      ${[a,b].map(n => `<button class="option-btn" style="font-size:44px; padding:26px 10px;" data-val="${n}" onclick="checkGeneric(this, ${n}, ${ans}, '${ans}', '${ans}', '對！${ans} 比較${word} 🎉', '正確是 ${ans}')">${n}</button>`).join('')}
+    </div>`;
+}
+
+/* ========== 三年級數學 ========== */
+/* 三位數加減 / 乘法 */
+function renderArith() {
+  const op = game.level.op;
+  let a, b, ans, sym, verb;
+  if (op === '×') {
+    const ar = game.level.aRange || [12, 199];
+    a = randInt(ar[0], ar[1]); b = randInt(2, 9); ans = a * b; sym = '×'; verb = '乘';
+  } else {
+    const r = game.level.range || [100, 899];
+    a = randInt(r[0], r[1]); b = randInt(r[0], r[1]);
+    if (op === '-') { if (b > a) { const t=a; a=b; b=t; } ans = a - b; sym = '−'; verb = '減'; }
+    else { ans = a + b; sym = '+'; verb = '加'; }
+  }
+  const span = Math.max(5, Math.round(ans * 0.12));
+  const set = new Set([ans]);
+  while (set.size < 4) { const c = ans + randInt(-span, span); if (c > 0 && c !== ans) set.add(c); }
+  const arr = shuffle([...set]);
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question"><div class="prompt">算算看是多少？<button class="speak-btn" onclick="speak('${a} ${verb} ${b}')">🔊</button></div></div>
+    <div class="big-display" style="font-size:50px;">${a} ${sym} ${b} = ?</div>
+    <div class="options">${arr.map(c => `<button class="option-btn" data-val="${c}" onclick="checkGeneric(this, ${c}, ${ans}, '${ans}', '${ans}', '答對了！🎉', '正確是 ${ans}')">${c}</button>`).join('')}</div>`;
+}
+
+/* 除法（整除 / 有餘數） */
+function renderDivide() {
+  const b = game.level.remainder ? randInt(3, 9) : randInt(2, 9);
+  const q = randInt(2, 9);
+  const rem = game.level.remainder ? randInt(1, b - 1) : 0;
+  const a = b * q + rem;
+  let ans, eq, sayT;
+  if (game.level.remainder) { ans = rem; eq = `${a} ÷ ${b} = ${q} … 餘 ?`; sayT = `餘 ${rem}`; }
+  else { ans = q; eq = `${a} ÷ ${b} = ?`; sayT = `${q}`; }
+  const okMax = game.level.remainder ? b - 1 : 9;
+  const target = Math.min(4, okMax + 1);
+  const set = new Set([ans]);
+  while (set.size < target) { const c = ans + randInt(-4, 4); if (c >= 0 && c <= okMax && c !== ans) set.add(c); }
+  const arr = shuffle([...set]);
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question"><div class="prompt">${game.level.remainder ? '算算看餘多少？' : '算算看是多少？'}<button class="speak-btn" onclick="speak('${a} 除以 ${b}')">🔊</button></div></div>
+    <div class="big-display" style="font-size:46px;">${eq}</div>
+    <div class="options">${arr.map(c => `<button class="option-btn" data-val="${c}" onclick="checkGeneric(this, ${c}, ${ans}, '${sayT}', '${sayT}', '答對了！🎉', '正確是 ${ans}')">${c}</button>`).join('')}</div>`;
+}
+
+/* 認識分數 */
+function renderFraction() {
+  const d = randInt(2, 8);
+  const n = randInt(1, d - 1);
+  const ans = `${n}/${d}`;
+  const cw = Math.min(42, Math.floor(320 / d));
+  let cells = '';
+  for (let i = 0; i < d; i++) cells += `<span style="display:inline-block; width:${cw}px; height:42px; border:2px solid var(--dark); background:${i < n ? 'var(--teal)' : '#fff'};"></span>`;
+  const opts = new Set([ans]);
+  for (const c of [`${n}/${d+1}`, `${n+1}/${d}`, `${d-n}/${d}`]) if (c !== ans && opts.size < 4) opts.add(c);
+  while (opts.size < 4) { const dd = randInt(2, 9), nn = randInt(1, dd - 1); const c = `${nn}/${dd}`; if (c !== ans) opts.add(c); }
+  const arr = shuffle([...opts]).slice(0, 4);
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question"><div class="prompt">平分成 ${d} 份，塗了 ${n} 份，是幾分之幾？<button class="speak-btn" onclick="speak('${d} 分之 ${n}')">🔊</button></div></div>
+    <div class="counting-area" style="gap:0;">${cells}</div>
+    <div class="options" style="grid-template-columns:1fr 1fr; max-width:420px; margin:0 auto;">
+      ${arr.map(o => `<button class="option-btn" style="font-size:30px;" data-val="${o}" onclick="checkGeneric(this, '${o}', '${ans}', '${ans}', '${d} 分之 ${n}', '答對了！🎉', '正確是 ${ans}')">${o}</button>`).join('')}
+    </div>`;
+}
+
+/* 同分母分數加減 */
+function renderFracAdd() {
+  const d = randInt(3, 8);
+  const plus = Math.random() < 0.5;
+  let n1, n2, res, sym;
+  if (plus) { n1 = randInt(1, d - 2); n2 = randInt(1, d - 1 - n1); res = n1 + n2; sym = '+'; }
+  else { n1 = randInt(2, d - 1); n2 = randInt(1, n1 - 1); res = n1 - n2; sym = '−'; }
+  const ans = `${res}/${d}`;
+  const fTarget = Math.min(4, d);
+  const opts = new Set([ans]);
+  for (const rr of [res + 1, res - 1, res + 2]) if (rr >= 1 && rr <= d && opts.size < fTarget) opts.add(`${rr}/${d}`);
+  while (opts.size < fTarget) { const rr = randInt(1, d); const c = `${rr}/${d}`; if (c !== ans) opts.add(c); }
+  const arr = shuffle([...opts]).slice(0, fTarget);
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question"><div class="prompt">算算看是多少？<button class="speak-btn" onclick="speak('${d} 分之 ${n1} ${plus ? '加' : '減'} ${d} 分之 ${n2}')">🔊</button></div></div>
+    <div class="big-display" style="font-size:42px;">${n1}/${d} ${sym} ${n2}/${d} = ?</div>
+    <div class="options" style="grid-template-columns:1fr 1fr; max-width:420px; margin:0 auto;">
+      ${arr.map(o => `<button class="option-btn" style="font-size:30px;" data-val="${o}" onclick="checkGeneric(this, '${o}', '${ans}', '${ans}', '${d} 分之 ${res}', '答對了！🎉', '正確是 ${ans}')">${o}</button>`).join('')}
+    </div>`;
+}
+
+/* ===== 結算 ===== */
+function finishLevel() {
+
+
+
+  const total = game.level.questions;
+  const correct = game.correctCount;
+  let stars = 0;
+  if (correct === total) stars = 3;
+  else if (correct >= total * 0.7) stars = 2;
+  else if (correct >= total * 0.4) stars = 1;
+  setStars(game.level.id, stars);
+  const reward = game.level.reward || REWARDS[0];
+  if (stars > 0 && !state.rewards.includes(reward)) {
+    state.rewards.push(reward);
+    saveState();
+  }
+  document.getElementById('resultEmoji').textContent = stars === 3 ? '🏆' : stars === 2 ? '🎉' : stars === 1 ? '👍' : '💪';
+  document.getElementById('resultTitle').textContent = stars === 3 ? '完美過關！太棒了！' : stars === 2 ? '做得很好！' : stars === 1 ? '繼續加油！' : '再挑戰一次吧！';
+  const starsHTML = [];
+  for (let i=0; i<3; i++) starsHTML.push(`<span class="s">${i < stars ? '⭐' : '☆'}</span>`);
+  document.getElementById('resultStars').innerHTML = starsHTML.join('');
+  document.getElementById('resultMsg').textContent = `答對 ${correct}/${total} 題`;
+  document.getElementById('rewardAnim').innerHTML = stars > 0 ? `<span class="reward-anim">${reward}</span><div style="font-size:15px; color:var(--brown);">你解鎖了新朋友！</div>` : '';
+  if (stars > 0) launchConfetti();
+  showPage('result');
+  setTimeout(() => {
+    const msg = stars === 3 ? '太厲害了，三顆星！' : stars === 2 ? '做得很好' : stars === 1 ? '繼續加油' : '再試一次';
+    speak(msg);
+  }, 600);
+}
+
+function launchConfetti() {
+  const emojis = ['🎉','🎊','⭐','✨','🌟','💫','🎈'];
+  for (let i=0; i<30; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.textContent = emojis[randInt(0, emojis.length-1)];
+    c.style.left = Math.random()*100 + 'vw';
+    c.style.animationDuration = (2 + Math.random()*2) + 's';
+    c.style.animationDelay = Math.random() + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 5000);
+  }
+}
+
+function retryLevel() { startLevel(currentLevel); }
+function nextLevel() {
+  const subj = SUBJECTS[currentSubject];
+  const idx = subj.levels.findIndex(l => l.id === currentLevel.id);
+  if (idx < subj.levels.length - 1) startLevel(subj.levels[idx+1]);
+  else backToLevels();
+}
+function backToLevels() { openSubject(currentSubject); }
+function exitGame() { speechSynthesis.cancel(); backToLevels(); }
+
+/* ===== 啟動 ===== */
+goGradeHome();
+document.addEventListener('click', function initVoice() {
+  loadVoices();
+  document.removeEventListener('click', initVoice);
+}, {once:true});
+</script>
+</body>
+</html>
