@@ -154,19 +154,19 @@
       <div class="grade-card g1" onclick="openGrade('g1')">
         <span class="grade-emoji">🐣</span>
         <h2>1 年級</h2>
-        <p>22 個關卡<br>數學 + 國語</p>
+        <p>24 個關卡<br>數學 + 國語</p>
         <div class="grade-badge ready">✓ 開放中</div>
       </div>
       <div class="grade-card g2" onclick="openGrade('g2')">
         <span class="grade-emoji">🐤</span>
         <h2>2 年級</h2>
-        <p>18 個關卡<br>乘法 · 部首 · 量詞</p>
+        <p>21 個關卡<br>乘法 · 部首 · 量詞</p>
         <div class="grade-badge ready">✓ 開放中</div>
       </div>
       <div class="grade-card g3" onclick="openGrade('g3')">
         <span class="grade-emoji">🐔</span>
         <h2>3 年級</h2>
-        <p>24 個關卡<br>除法 · 分數 · 修辭 · 自然</p>
+        <p>27 個關卡<br>除法 · 分數 · 修辭 · 自然</p>
         <div class="grade-badge ready">✓ 開放中</div>
       </div>
     </div>
@@ -257,7 +257,9 @@ const GRADES = {
       { id: 'm12', num: 11, title: '立體王國', desc: '認識立體形狀',      type: 'shapes3d',  questions: 6, reward: '🐯' },
       { id: 'm13', num: 12, title: '比長短',   desc: '哪一個比較長',      type: 'length',    questions: 6, reward: '🐸' },
       { id: 'm14', num: 13, title: '認錢幣',   desc: '數一數有多少錢',    type: 'money',     questions: 6, reward: '🐵' },
-      { id: 'm8',  num: 14, title: '小時鐘',   desc: '整點與半點',        type: 'clock',     questions: 6, reward: '🐧' }
+      { id: 'm8',  num: 14, title: '小時鐘',   desc: '整點與半點',        type: 'clock',     questions: 6, reward: '🐧' },
+      { id: 'm15', num: 15, title: '位值王',   desc: '幾個十幾個一',      type: 'placeval',  questions: 6, reward: '🦝' },
+      { id: 'm16', num: 16, title: '應用題',   desc: '加減小故事',        type: 'wordsum',   questions: 6, reward: '🦫' }
     ]
   },
   chinese: {
@@ -287,7 +289,10 @@ const GRADES = {
         { id: 'n7',  num: 7,  title: '幾時幾分', desc: '報讀到 5 分',    type: 'clock',      clockMode: 'minute', questions: 6, reward: '🦉' },
         { id: 'n8',  num: 8,  title: '長度單位', desc: '公分與公尺',     type: 'mc',         bank: 'lengthUnit', questions: 6, reward: '🦢' },
         { id: 'n9',  num: 9,  title: '形狀邊角', desc: '邊數與角數',     type: 'mc',         bank: 'polygon', questions: 6, reward: '🦅' },
-        { id: 'n10', num: 10, title: '錢幣計算', desc: '含 50 元',       type: 'money',      denoms: [1,5,10,50], questions: 6, reward: '🐲' }
+        { id: 'n10', num: 10, title: '錢幣計算', desc: '含 50 元',       type: 'money',      denoms: [1,5,10,50], questions: 6, reward: '🐲' },
+        { id: 'n11', num: 11, title: '單位分數', desc: '幾分之一',       type: 'unitfrac',   questions: 6, reward: '🦦' },
+        { id: 'n12', num: 12, title: '分裝平分', desc: '平分給幾人',     type: 'sharing',    questions: 6, reward: '🦡' },
+        { id: 'n13', num: 13, title: '找找看',   desc: '□ 是多少',       type: 'missing',    questions: 6, reward: '🦨' }
       ]
     },
     chinese: {
@@ -317,7 +322,10 @@ const GRADES = {
         { id: 'p7',  num: 7,  title: '認識分數',   desc: '幾分之幾',       type: 'fraction', questions: 6, reward: '🐷' },
         { id: 'p8',  num: 8,  title: '分數加減',   desc: '同分母加減',     type: 'fracadd', questions: 6, reward: '🐹' },
         { id: 'p9',  num: 9,  title: '時間計算',   desc: '時、分、秒',     type: 'mc', bank: 'time3', questions: 6, reward: '🐭' },
-        { id: 'p10', num: 10, title: '長度重量',   desc: '毫米公里公斤',   type: 'mc', bank: 'units3', questions: 6, reward: '🐰' }
+        { id: 'p10', num: 10, title: '長度重量',   desc: '毫米公里公斤',   type: 'mc', bank: 'units3', questions: 6, reward: '🐰' },
+        { id: 'p11', num: 11, title: '一位小數',   desc: '小數加減比較',   type: 'decimal',    questions: 6, reward: '🦥' },
+        { id: 'p12', num: 12, title: '角與角度',   desc: '直角銳角鈍角',   type: 'mc', bank: 'angle', questions: 6, reward: '🦘' },
+        { id: 'p13', num: 13, title: '數線',       desc: '在數線上找數',   type: 'numberline', questions: 6, reward: '🦬' }
       ]
     },
     chinese: {
@@ -617,6 +625,13 @@ function nextQuestion() {
   else if (t === 'divide') renderDivide();
   else if (t === 'fraction') renderFraction();
   else if (t === 'fracadd') renderFracAdd();
+  else if (t === 'placeval') renderPlaceVal();
+  else if (t === 'wordsum') renderWordSum();
+  else if (t === 'unitfrac') renderUnitFrac();
+  else if (t === 'sharing') renderSharing();
+  else if (t === 'missing') renderMissing();
+  else if (t === 'decimal') renderDecimal();
+  else if (t === 'numberline') renderNumberLine();
   else if (t === 'mc') renderMC();
   else if (t === 'tones') renderTones();
   else if (t === 'spell') renderSpell();
@@ -1545,6 +1560,14 @@ const MC_BANKS = {
     {q:'影子會出現在光的哪一邊？', a:'背對光的另一邊', opts:['背對光的另一邊','正對光那邊','正上方','看不出來']},
     {q:'光前進的路線是？', a:'直線', opts:['直線','彎曲','繞圈','隨便亂走']},
     {q:'中午太陽在頭頂時，影子會？', a:'最短', opts:['最短','最長','不見','變彩色']}
+  ],
+  angle: [
+    {q:'時鐘指到 3 點整，長短針形成什麼角？', a:'直角', opts:['直角','銳角','鈍角','平角']},
+    {q:'比直角「小」的角叫什麼角？', a:'銳角', opts:['銳角','鈍角','直角','圓角']},
+    {q:'比直角「大」的角叫什麼角？', a:'鈍角', opts:['鈍角','銳角','直角','尖角']},
+    {q:'直角是幾度？', a:'90 度', opts:['90 度','60 度','100 度','180 度']},
+    {q:'正方形的每個角都是什麼角？', a:'直角', opts:['直角','銳角','鈍角','平角']},
+    {q:'下列哪一種角最大？', a:'鈍角', opts:['鈍角','直角','銳角','都一樣']}
   ]
 };
 
@@ -1733,8 +1756,166 @@ function renderFracAdd() {
     </div>`;
 }
 
+/* ===== ★補：一年級 位值 ===== */
+function renderPlaceVal() {
+  const t = randInt(1,9), o = randInt(0,9);
+  const n = t*10 + o;
+  const compose = Math.random() < 0.5;
+  let prompt, ans, choices;
+  if (compose) {
+    ans = n; prompt = `${t} 個十和 ${o} 個一，合起來是多少？`;
+    const set = new Set([ans]);
+    while (set.size < 4) { const c = ans + randInt(-3,3) * (Math.random()<0.5?1:10); if (c>0 && c<100 && c!==ans) set.add(c); }
+    choices = shuffle([...set]);
+  } else {
+    const askTens = Math.random() < 0.5;
+    ans = askTens ? t : o; prompt = `${n} 裡面有幾個 ${askTens?'十':'一'}？`;
+    const set = new Set([ans]); while (set.size < 4) { const c = randInt(0,9); if (c!==ans) set.add(c); }
+    choices = shuffle([...set]);
+  }
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question"><div class="prompt">${prompt}<button class="speak-btn" onclick="speak('${prompt}')">🔊</button></div></div>
+    <div class="options">${choices.map(c=>`<button class="option-btn" data-val="${c}" onclick="checkGeneric(this, ${c}, ${ans}, '${ans}', '${ans}', '答對了！🎉', '正確是 ${ans}')">${c}</button>`).join('')}</div>`;
+}
+
+/* ===== ★補：一年級 加減應用題 ===== */
+const WORD_TMPL = [
+  {e:'🐦', s:'樹上有 {a} 隻小鳥，又飛來 {b} 隻，現在有幾隻？', op:'+'},
+  {e:'🐟', s:'魚缸有 {a} 條魚，再放入 {b} 條，一共有幾條？', op:'+'},
+  {e:'🎈', s:'手上有 {a} 個氣球，又買了 {b} 個，總共幾個？', op:'+'},
+  {e:'🍎', s:'籃子裡有 {a} 顆蘋果，吃掉 {b} 顆，還剩幾顆？', op:'-'},
+  {e:'🍬', s:'有 {a} 顆糖果，送給朋友 {b} 顆，剩下幾顆？', op:'-'},
+  {e:'🐶', s:'公園有 {a} 隻狗，走了 {b} 隻，還有幾隻？', op:'-'}
+];
+function renderWordSum() {
+  const tm = WORD_TMPL[randInt(0, WORD_TMPL.length-1)];
+  let a, b;
+  if (tm.op === '+') { a = randInt(2,9); b = randInt(1, 9); }
+  else { a = randInt(5, 18); b = randInt(1, a-1); }
+  const ans = tm.op === '+' ? a+b : a-b;
+  const story = tm.s.replace('{a}', a).replace('{b}', b);
+  const set = new Set([ans]);
+  while (set.size < 4) { const c = ans + randInt(-3,3); if (c>=0 && c!==ans) set.add(c); }
+  const arr = shuffle([...set]);
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question">
+      <div style="font-size:64px;">${tm.e}</div>
+      <div class="prompt">${story}<button class="speak-btn" onclick="speak('${story}')">🔊</button></div>
+    </div>
+    <div class="options">${arr.map(c=>`<button class="option-btn" data-val="${c}" onclick="checkGeneric(this, ${c}, ${ans}, '${ans}', '${ans}', '答對了！🎉', '正確是 ${ans}')">${c}</button>`).join('')}</div>`;
+  setTimeout(() => speak(story), 400);
+}
+
+/* ===== ★補：二年級 單位分數 ===== */
+function renderUnitFrac() {
+  const d = randInt(2,6);
+  const ans = `1/${d}`;
+  const cw = Math.min(50, Math.floor(300/d));
+  let cells = '';
+  for (let i=0;i<d;i++) cells += `<span style="display:inline-block;width:${cw}px;height:46px;border:2px solid var(--dark);background:${i===0?'var(--pink)':'#fff'};"></span>`;
+  const opts = new Set([ans]);
+  for (const dd of [d+1,d-1,d+2,d+3]) if (dd>=2 && opts.size<4) opts.add(`1/${dd}`);
+  while (opts.size<4){ const dd=randInt(2,9); if(dd!==d) opts.add(`1/${dd}`); }
+  const arr = shuffle([...opts]).slice(0,4);
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question"><div class="prompt">平分成 ${d} 份，塗色的一份是幾分之一？<button class="speak-btn" onclick="speak('平分成 ${d} 份，一份是幾分之一')">🔊</button></div></div>
+    <div class="counting-area" style="gap:0;">${cells}</div>
+    <div class="options" style="grid-template-columns:1fr 1fr; max-width:400px; margin:0 auto;">
+      ${arr.map(o=>`<button class="option-btn" style="font-size:30px;" data-val="${o}" onclick="checkGeneric(this, '${o}', '${ans}', '${ans}', '${d} 分之 1', '答對了！🎉', '正確是 ${ans}')">${o}</button>`).join('')}
+    </div>`;
+}
+
+/* ===== ★補：二年級 分裝與平分 ===== */
+function renderSharing() {
+  const per = randInt(2,6), groups = randInt(2,5);
+  const total = per * groups;
+  const askPer = Math.random() < 0.5;
+  const ans = askPer ? per : groups;
+  const prompt = askPer
+    ? `${total} 顆糖果平分給 ${groups} 個人，每人幾顆？`
+    : `${total} 顆糖果，每人分 ${per} 顆，可以分給幾個人？`;
+  const set = new Set([ans]);
+  while (set.size < 4) { const c = ans + randInt(-3,3); if (c>0 && c!==ans) set.add(c); }
+  const arr = shuffle([...set]);
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question"><div class="prompt">${prompt}<button class="speak-btn" onclick="speak('${prompt}')">🔊</button></div></div>
+    <div class="options">${arr.map(c=>`<button class="option-btn" data-val="${c}" onclick="checkGeneric(this, ${c}, ${ans}, '${ans}', '${ans}', '答對了！🎉', '正確是 ${ans}')">${c}</button>`).join('')}</div>`;
+}
+
+/* ===== ★補：二年級 加減未知數 ===== */
+function renderMissing() {
+  const plus = Math.random() < 0.5;
+  let a, b;
+  if (plus) { a = randInt(2,9); b = randInt(2,9); } else { b = randInt(2,9); a = b + randInt(1,9); }
+  const res = plus ? a+b : a-b;
+  const which = randInt(0,1);
+  let eq, ans;
+  if (plus) { if (which===0){ eq=`□ + ${b} = ${res}`; ans=a; } else { eq=`${a} + □ = ${res}`; ans=b; } }
+  else      { if (which===0){ eq=`□ − ${b} = ${res}`; ans=a; } else { eq=`${a} − □ = ${res}`; ans=b; } }
+  const set = new Set([ans]);
+  while (set.size < 4) { const c = ans + randInt(-3,3); if (c>=0 && c<=20 && c!==ans) set.add(c); }
+  const arr = shuffle([...set]);
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question"><div class="prompt">□ 裡面是多少？<button class="speak-btn" onclick="speak('方塊裡面是多少')">🔊</button></div></div>
+    <div class="big-display" style="font-size:52px;">${eq}</div>
+    <div class="options">${arr.map(c=>`<button class="option-btn" data-val="${c}" onclick="checkGeneric(this, ${c}, ${ans}, '${ans}', '${ans}', '答對了！🎉', '正確是 ${ans}')">${c}</button>`).join('')}</div>`;
+}
+
+/* ===== ★補：三年級 一位小數 ===== */
+function renderDecimal() {
+  const mode = ['add','count','compare'][randInt(0,2)];
+  if (mode === 'count') {
+    const k = randInt(1,9); const ans = k;
+    const set = new Set([ans]); while(set.size<4){const c=randInt(1,9); if(c!==ans)set.add(c);}
+    const arr = shuffle([...set]);
+    const prompt = `0.${k} 裡面有幾個 0.1？`;
+    document.getElementById('gameContent').innerHTML = `
+      <div class="question"><div class="prompt">${prompt}<button class="speak-btn" onclick="speak('${prompt}')">🔊</button></div></div>
+      <div class="options">${arr.map(c=>`<button class="option-btn" data-val="${c}" onclick="checkGeneric(this, ${c}, ${ans}, '${ans}', '${ans}', '答對了！🎉', '正確是 ${ans}')">${c}</button>`).join('')}</div>`;
+  } else if (mode === 'compare') {
+    let x = randInt(1,9), y = randInt(1,9); while(y===x) y=randInt(1,9);
+    const big = Math.max(x,y)/10, ans = big.toFixed(1);
+    const a = (x/10).toFixed(1), b = (y/10).toFixed(1);
+    document.getElementById('gameContent').innerHTML = `
+      <div class="question"><div class="prompt">哪一個小數比較大？<button class="speak-btn" onclick="speak('哪一個小數比較大')">🔊</button></div></div>
+      <div class="options" style="grid-template-columns:1fr 1fr; max-width:400px; margin:0 auto;">
+        ${[a,b].map(o=>`<button class="option-btn" style="font-size:40px;" data-val="${o}" onclick="checkGeneric(this, '${o}', '${ans}', '${ans}', '${ans}', '答對了！🎉', '正確是 ${ans}')">${o}</button>`).join('')}
+      </div>`;
+  } else {
+    const ai = randInt(1,8); const bi = randInt(1, 9-ai);
+    const ansVal = ((ai+bi)/10).toFixed(1), ans = ansVal;
+    const opts = new Set([ans]);
+    for (const dlt of [1,-1,2,-2]) { const v=((ai+bi+dlt)/10); if(v>0&&v<10&&opts.size<4) opts.add(v.toFixed(1)); }
+    const arr = shuffle([...opts]).slice(0,4);
+    const prompt = `0.${ai} + 0.${bi} = ?`;
+    document.getElementById('gameContent').innerHTML = `
+      <div class="question"><div class="prompt">算算看是多少？<button class="speak-btn" onclick="speak('0點${ai} 加 0點${bi}')">🔊</button></div></div>
+      <div class="big-display" style="font-size:52px;">${prompt}</div>
+      <div class="options">${arr.map(o=>`<button class="option-btn" data-val="${o}" onclick="checkGeneric(this, '${o}', '${ans}', '${ans}', '${ans}', '答對了！🎉', '正確是 ${ans}')">${o}</button>`).join('')}</div>`;
+  }
+}
+
+/* ===== ★補：三年級 數線 ===== */
+function renderNumberLine() {
+  const k = randInt(0,10);
+  const x = 30 + k * 24;
+  let ticks = '';
+  for (let i=0;i<=10;i++){ const tx=30+i*24; ticks += `<line x1="${tx}" y1="60" x2="${tx}" y2="70" stroke="#2D3436" stroke-width="2"/><text x="${tx}" y="88" text-anchor="middle" font-size="13" fill="#2D3436">${i}</text>`; }
+  const svg = `<svg viewBox="0 0 300 100" width="300" height="100" style="display:block;margin:0 auto;">
+    <line x1="30" y1="65" x2="270" y2="65" stroke="#2D3436" stroke-width="3"/>
+    ${ticks}
+    <polygon points="${x-8},40 ${x+8},40 ${x},58" fill="#FF6B6B"/></svg>`;
+  const set = new Set([k]); while(set.size<4){const c=k+randInt(-3,3); if(c>=0&&c<=10&&c!==k)set.add(c);}
+  const arr = shuffle([...set]);
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question"><div class="prompt">紅色箭頭指的是哪個數字？<button class="speak-btn" onclick="speak('箭頭指的是哪個數字')">🔊</button></div></div>
+    ${svg}
+    <div class="options" style="margin-top:14px;">${arr.map(c=>`<button class="option-btn" data-val="${c}" onclick="checkGeneric(this, ${c}, ${k}, '${k}', '${k}', '答對了！🎉', '正確是 ${k}')">${c}</button>`).join('')}</div>`;
+}
+
 /* ===== 結算 ===== */
 function finishLevel() {
+
 
 
 
