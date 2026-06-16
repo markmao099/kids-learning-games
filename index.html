@@ -183,7 +183,7 @@
       <span class="star-display">⭐ <span id="totalStars2">0</span></span>
     </div>
     <div class="header" style="padding:10px 0;">
-      <h1 style="font-size:32px;">小朋友，要去哪個教室？</h1>
+      <h1 id="subjectGreeting" style="font-size:32px;">小朋友，要去哪個教室？</h1>
     </div>
     <div class="subject-grid" id="subjectGrid"></div>
     <div style="text-align:center; margin-top:30px; color:var(--brown); font-size:14px;">
@@ -432,6 +432,10 @@ let state = loadState();
 let currentSubject = null;
 let currentLevel = null;
 let game = null;
+let currentChild = '苡忻';
+const PRAISES = ['{n}你很棒！🎉','{n}好厲害！🌟','答對了，{n}真聰明！👏','{n}太強了！💪','{n}做得真好！😄','{n}你超棒的！🏆'];
+function pickPraise() { return PRAISES[Math.floor(Math.random()*PRAISES.length)].replace('{n}', currentChild); }
+function speakPraise(t) { speak(t, 0.8); }
 let matchSelected = null;
 
 function loadState() {
@@ -459,7 +463,10 @@ const SUBJECT_BLURB = { math: '數字 · 計算 · 形狀', chinese: '注音 · 
 function openGrade(g) {
   if (!GRADES[g]) return;
   SUBJECTS = GRADES[g];
+  currentChild = (g === 'g3') ? '苡安' : '苡忻';
   document.getElementById('gradeNameDisplay').textContent = (g === 'g1' ? '1 年級' : g === 'g2' ? '2 年級' : '3 年級');
+  const _greet = document.getElementById('subjectGreeting');
+  if (_greet) _greet.textContent = currentChild + '，要去哪個教室？';
   document.getElementById('totalStars2').textContent = totalStars();
   const grid = document.getElementById('subjectGrid');
   grid.innerHTML = '';
@@ -487,7 +494,7 @@ function openSubject(key) {
   grid.innerHTML = '';
   subj.levels.forEach((lv, i) => {
     const prev = i > 0 ? subj.levels[i-1].id : null;
-    const locked = prev && getStars(prev) === 0;
+    const locked = false;
     const card = document.createElement('div');
     card.className = 'level-card' + (locked ? ' locked' : '');
     const s = getStars(lv.id);
@@ -510,7 +517,7 @@ if (typeof speechSynthesis !== 'undefined') {
   speechSynthesis.onvoiceschanged = loadVoices;
   loadVoices();
 }
-function speak(text, rate=0.85) {
+function speak(text, rate=0.72) {
   if (typeof speechSynthesis === 'undefined') return;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
@@ -521,8 +528,8 @@ function speak(text, rate=0.85) {
   if (zh) u.voice = zh;
   speechSynthesis.speak(u);
 }
-function speakBopo(b) { speak(BOPO_SOUND[b] || b, 0.7); }
-function speakNum(n) { speak(numberToZh(n), 0.85); }
+function speakBopo(b) { speak(BOPO_SOUND[b] || b, 0.5); }
+function speakNum(n) { speak(numberToZh(n), 0.78); }
 
 /* ===== 答案揭曉泡泡 ===== */
 let _arSpeakFn = null;
@@ -541,7 +548,7 @@ function showAnswerReveal(isCorrect, answerHTML, speakFn) {
      <button class="ar-speak-btn" title="再聽一次" onclick="_arSpeakFn&&_arSpeakFn()">🔊</button>`;
   const fb = document.getElementById('feedback');
   if (fb && fb.parentNode) fb.parentNode.insertBefore(div, fb.nextSibling);
-  if (speakFn) setTimeout(speakFn, 450);
+  if (speakFn && !isCorrect) setTimeout(speakFn, 450);
 }
 function numberToZh(n) {
   if (n <= 20) return NUM_CHAR[n];
@@ -635,17 +642,19 @@ function answerCorrect(msg = '答對啦！🎉') {
   game.correctCount++;
   document.getElementById('gameScore').textContent = game.score;
   const fb = document.getElementById('feedback');
-  fb.textContent = msg;
+  const praise = pickPraise();
+  fb.textContent = praise;
   fb.className = 'feedback good';
-  setTimeout(() => { game.qIndex++; nextQuestion(); }, 1200);
+  speakPraise(praise);
+  setTimeout(() => { game.qIndex++; nextQuestion(); }, 1600);
 }
 function answerWrong(msg = '差一點！再試試 💪') {
   game.hearts--;
   document.getElementById('hearts').textContent = game.hearts;
   const fb = document.getElementById('feedback');
-  fb.textContent = msg;
+  fb.textContent = currentChild + '，再試一次，你可以的！💪';
   fb.className = 'feedback bad';
-  setTimeout(() => { game.qIndex++; nextQuestion(); }, 1500);
+  setTimeout(() => { game.qIndex++; nextQuestion(); }, 1800);
 }
 
 /* ===== M1: 數一數 ===== */
@@ -1751,8 +1760,8 @@ function finishLevel() {
   if (stars > 0) launchConfetti();
   showPage('result');
   setTimeout(() => {
-    const msg = stars === 3 ? '太厲害了，三顆星！' : stars === 2 ? '做得很好' : stars === 1 ? '繼續加油' : '再試一次';
-    speak(msg);
+    const msg = stars > 0 ? `${currentChild}你又過了一關，好厲害！` : `${currentChild}沒關係，再玩一次！`;
+    speak(msg, 0.8);
   }, 600);
 }
 
