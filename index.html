@@ -267,7 +267,7 @@ const GRADES = {
     levels: [
       { id: 'c1', num: 1, title: '聲符家族',   desc: '21 個聲母',     type: 'bopomofo',       set: 'sheng', questions: 6, reward: '🐥' },
       { id: 'c2', num: 2, title: '韻符家族',   desc: '13 個韻母',     type: 'bopomofo',       set: 'yun',   questions: 6, reward: '🦄' },
-      { id: 'c3', num: 3, title: '介符組合',   desc: 'ㄧㄨㄩ',        type: 'bopomofo',       set: 'jie',   questions: 4, reward: '🐢' },
+      { id: 'c3', num: 3, title: '介符組合',   desc: 'ㄧㄨㄩ',        type: 'bopomofo',       set: 'jie',   questions: 3, reward: '🐢' },
       { id: 'c4', num: 4, title: '聽音辨注音', desc: '混合考驗',      type: 'bopomofoListen', set: 'all',   questions: 6, reward: '🦖' },
       { id: 'c5', num: 5, title: '四聲挑戰',   desc: '一二三四聲',     type: 'tones',                        questions: 6, reward: '🐳' },
       { id: 'c8', num: 6, title: '結合韻',     desc: 'ㄧㄚ ㄨㄛ 拼讀', type: 'spell',          pool: 'blend', questions: 6, reward: '🦉' },
@@ -578,11 +578,29 @@ function shuffle(arr) {
 }
 function randInt(min, max) { return Math.floor(Math.random()*(max-min+1)) + min; }
 function pickRandom(arr, n) { return shuffle(arr).slice(0, n); }
+/* ===== 同一關不重複 ===== */
+function pushRecent(sig){ if(!game.recent) game.recent=[]; game.recent.push(sig); if(game.recent.length>8) game.recent.shift(); }
+function freshPick(arr, keyOf){
+  const cap=Math.min(arr.length-1, (game.level.questions||6)-1);
+  const recent=(game.recent||[]).slice(-cap);
+  const avail=arr.filter(x=>!recent.includes(keyOf(x)));
+  const pool=avail.length?avail:arr;
+  const item=pool[randInt(0,pool.length-1)];
+  pushRecent(keyOf(item));
+  return item;
+}
+function freshVal(genFn){
+  const cap=Math.min(5,(game.level.questions||6)-1);
+  let v,t=0;
+  do{ v=genFn(); t++; } while(t<30 && (game.recent||[]).slice(-cap).includes('v:'+v));
+  pushRecent('v:'+v);
+  return v;
+}
 
 /* ===== 主流程 ===== */
 function startLevel(level) {
   currentLevel = level;
-  game = { level, qIndex: 0, score: 0, hearts: 3, correctCount: 0 };
+  game = { level, qIndex: 0, score: 0, hearts: 3, correctCount: 0, recent: [] };
   document.getElementById('gameTitle').textContent = level.title;
   document.getElementById('totalQ').textContent = level.questions;
   document.getElementById('gameScore').textContent = 0;
@@ -600,7 +618,9 @@ function nextQuestion() {
   document.getElementById('feedback').className = 'feedback';
   const old = document.getElementById('answerReveal');
   if (old) old.remove();
-  const t = game.level.type;
+  renderWithNoRepeat();
+}
+function dispatchRender(t) {
   if (t === 'counting') renderCounting();
   else if (t === 'matchNum') renderMatchNum();
   else if (t === 'sortNum') renderSortNum();
@@ -636,6 +656,25 @@ function nextQuestion() {
   else if (t === 'tones') renderTones();
   else if (t === 'spell') renderSpell();
   else if (t === 'charMatch') renderCharMatch();
+}
+function qSignature() {
+  const h = (document.getElementById('gameContent').innerHTML) || '';
+  const p = (h.match(/class="prompt">([\s\S]*?)<\/div>/) || [])[1] || '';
+  const bd = (h.match(/big-display[^>]*>([\s\S]*?)<\/div>/) || [])[1] || '';
+  const a = (/check\w+\(this,\s*[^,]+,\s*('?[^,')]+'?)/.exec(h) || [])[1] || '';
+  const items = (h.match(/class="item"/g) || []).length;
+  return p + '|' + bd + '|' + a + '|' + items;
+}
+function renderWithNoRepeat() {
+  const t = game.level.type;
+  if (t === 'matchNum' || t === 'charMatch' || t === 'sortNum') { dispatchRender(t); return; }
+  if (!game.sigList) game.sigList = [];
+  const cap = Math.min(8, (game.level.questions || 6) - 1);
+  let sig = '', tries = 0;
+  do { dispatchRender(t); sig = qSignature(); tries++; }
+  while (tries < 15 && cap > 0 && game.sigList.slice(-cap).includes(sig));
+  game.sigList.push(sig);
+  if (game.sigList.length > 20) game.sigList.shift();
 }
 /* 通用四選一檢查 */
 function checkGeneric(btn, choice, ans, revealHTML, speakText, okMsg, badMsg) {
@@ -674,7 +713,7 @@ function answerWrong(msg = '差一點！再試試 💪') {
 
 /* ===== M1: 數一數 ===== */
 function renderCounting() {
-  const ans = randInt(1, 10);
+  const ans = freshVal(()=>randInt(1, 10));
   const emoji = ITEM_EMOJIS[randInt(0, ITEM_EMOJIS.length-1)];
   let items = '';
   for (let i=0; i<ans; i++) items += `<span class="item">${emoji}</span>`;
@@ -980,7 +1019,7 @@ function checkMathAns(btn, choice, ans) {
 
 /* ===== M7: 形狀辨識 ===== */
 function renderShapes() {
-  const ans = SHAPES[randInt(0, SHAPES.length-1)];
+  const ans = freshPick(SHAPES, s=>s.name);
   const distractors = shuffle(SHAPES.filter(s => s.name !== ans.name)).slice(0,3);
   const choices = shuffle([ans, ...distractors]);
   const mode = Math.random() < 0.5 ? 'image' : 'name';
@@ -1083,7 +1122,7 @@ function renderBopomofo() {
   if (set === 'sheng') pool = SHENG;
   else if (set === 'yun') pool = YUN.filter(b => !JIE.includes(b));
   else pool = JIE;
-  const ans = pool[randInt(0, pool.length-1)];
+  const ans = freshPick(pool, x=>x);
   const allBopo = [...SHENG, ...YUN];
   const distractors = shuffle(allBopo.filter(b => b !== ans)).slice(0,3);
   const choices = shuffle([ans, ...distractors]);
@@ -1115,7 +1154,7 @@ function checkBopo(btn, choice, ans) {
 /* ===== C4: 聽音辨注音 ===== */
 function renderBopoListen() {
   const allBopo = [...SHENG, ...YUN];
-  const ans = allBopo[randInt(0, allBopo.length-1)];
+  const ans = freshPick(allBopo, x=>x);
   const distractors = shuffle(allBopo.filter(b => b !== ans)).slice(0,3);
   const choices = shuffle([ans, ...distractors]);
   document.getElementById('gameContent').innerHTML = `
@@ -1132,7 +1171,7 @@ function renderBopoListen() {
 
 /* ===== C5: 四聲挑戰 ===== */
 function renderTones() {
-  const group = TONE_GROUPS[randInt(0, TONE_GROUPS.length-1)];
+  const group = freshPick(TONE_GROUPS, g=>g.base);
   const toneIdx = randInt(0, 3);
   const ans = group.words[toneIdx];
   const bopo = group.base + TONE_MARKS[toneIdx];
@@ -1165,7 +1204,7 @@ function checkTone(btn, choice, ans, idx, ansIdx) {
 /* ===== C6: 注音拼字 ===== */
 function renderSpell() {
   const bank = SPELL_BANK[game.level.pool] || SPELL_BANK.word;
-  const w = bank[randInt(0, bank.length-1)];
+  const w = freshPick(bank, x=>x.char);
   const distractorPool = [...new Set(bank.filter(x => x.bopo !== w.bopo).map(x => x.bopo))];
   const distractors = shuffle(distractorPool).slice(0,3);
   const choices = shuffle([w.bopo, ...distractors]);
@@ -1251,7 +1290,7 @@ function renderCompare() {
 
 /* ===== M11: 單數雙數 ===== */
 function renderOddEven() {
-  const n = randInt(1, 20);
+  const n = freshVal(()=>randInt(1, 20));
   const isEven = n % 2 === 0;
   const ans = isEven ? '雙數' : '單數';
   let dots = '';
@@ -1273,7 +1312,7 @@ function renderOddEven() {
 
 /* ===== M12: 立體王國 ===== */
 function renderShapes3d() {
-  const ans = SHAPES3D[randInt(0, SHAPES3D.length-1)];
+  const ans = freshPick(SHAPES3D, s=>s.name);
   const choices = shuffle(SHAPES3D.slice());
   document.getElementById('gameContent').innerHTML = `
     <div class="question">
@@ -1574,7 +1613,7 @@ const MC_BANKS = {
 /* 二年級：通用選擇題 */
 function renderMC() {
   const bank = MC_BANKS[game.level.bank] || [];
-  const item = bank[randInt(0, bank.length-1)];
+  const item = freshPick(bank, it=>it.q);
   const opts = shuffle(item.opts.slice());
   const say = item.say || item.a;
   const passage = item.passage ? `<div style="background:#fff; border:3px solid var(--dark); border-radius:16px; padding:14px 16px; margin-bottom:14px; font-size:17px; line-height:1.85; text-align:left;">📖 ${item.passage}</div>` : '';
@@ -1808,7 +1847,7 @@ function renderWordSum() {
 
 /* ===== ★補：二年級 單位分數 ===== */
 function renderUnitFrac() {
-  const d = randInt(2,6);
+  const d = freshVal(()=>randInt(2,8));
   const ans = `1/${d}`;
   const cw = Math.min(50, Math.floor(300/d));
   let cells = '';
