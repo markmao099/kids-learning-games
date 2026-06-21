@@ -156,13 +156,13 @@
       <div class="grade-card g1" onclick="openGrade('g1')">
         <span class="grade-emoji">🐣</span>
         <h2>1 年級</h2>
-        <p>24 個關卡<br>數學 + 國語</p>
+        <p>26 個關卡<br>數學 + 國語</p>
         <div class="grade-badge ready">✓ 開放中</div>
       </div>
       <div class="grade-card g2" onclick="openGrade('g2')">
         <span class="grade-emoji">🐤</span>
         <h2>2 年級</h2>
-        <p>21 個關卡<br>乘法 · 部首 · 量詞</p>
+        <p>23 個關卡<br>乘法 · 部首 · 量詞</p>
         <div class="grade-badge ready">✓ 開放中</div>
       </div>
       <div class="grade-card g3" onclick="openGrade('g3')">
@@ -280,7 +280,9 @@ const GRADES = {
       { id: 'c5', num: 5, title: '四聲挑戰',   desc: '一二三四聲',     type: 'tones',                        questions: 6, reward: '🐳' },
       { id: 'c8', num: 6, title: '結合韻',     desc: 'ㄧㄚ ㄨㄛ 拼讀', type: 'spell',          pool: 'blend', questions: 6, reward: '🦉' },
       { id: 'c6', num: 7, title: '注音拼字',   desc: '聽字選注音',     type: 'spell',          pool: 'word',  questions: 6, reward: '🦔' },
-      { id: 'c7', num: 8, title: '形音配對',   desc: '常用國字↔注音', type: 'charMatch',                    questions: 5, reward: '🦋' }
+      { id: 'c7', num: 8, title: '形音配對',   desc: '常用國字↔注音', type: 'charMatch',                    questions: 5, reward: '🦋' },
+      { id: 'c9',  num: 9,  title: '認字讀音', desc: '看字選注音', type: 'readchar',   charset: 'g1', questions: 6, reward: '🐌' },
+      { id: 'c10', num: 10, title: '聽音認字', desc: '聽音選國字', type: 'listenchar', charset: 'g1', questions: 6, reward: '🐢' }
     ]
   }
   },
@@ -313,7 +315,9 @@ const GRADES = {
         { id: 'k5', num: 5, title: '標點符號', desc: '句號逗號問號', type: 'mc', bank: 'punct',     questions: 6, reward: '🕊️' },
         { id: 'k6', num: 6, title: '同音字',   desc: '相同的音',     type: 'mc', bank: 'homophone', questions: 6, reward: '🦃' },
         { id: 'k7', num: 7, title: '形近字',   desc: '長得很像',     type: 'mc', bank: 'similar',   questions: 6, reward: '🐓' },
-        { id: 'k8', num: 8, title: '造詞高手', desc: '組成語詞',     type: 'mc', bank: 'wordbuild', questions: 6, reward: '🦤' }
+        { id: 'k8', num: 8, title: '造詞高手', desc: '組成語詞',     type: 'mc', bank: 'wordbuild', questions: 6, reward: '🦤' },
+        { id: 'k9',  num: 9,  title: '認字讀音', desc: '看字選注音', type: 'readchar',   charset: 'g2', questions: 6, reward: '🦫' },
+        { id: 'k10', num: 10, title: '聽音認字', desc: '聽音選國字', type: 'listenchar', charset: 'g2', questions: 6, reward: '🦔' }
       ]
     }
   },
@@ -729,6 +733,8 @@ function dispatchRender(t) {
   else if (t === 'rounding') renderRounding();
   else if (t === 'area') renderArea();
   else if (t === 'decimal2') renderDecimal2();
+  else if (t === 'readchar') renderReadChar();
+  else if (t === 'listenchar') renderListenChar();
   else if (t === 'mc') renderMC();
   else if (t === 'tones') renderTones();
   else if (t === 'spell') renderSpell();
@@ -2407,8 +2413,69 @@ function renderDecimal2() {
   }
 }
 
+/* ===== 一二年級：認字字庫 ===== */
+const CHARS = {
+  g1: [
+    {char:'大',bopo:'ㄉㄚ'},{char:'小',bopo:'ㄒㄧㄠ'},{char:'上',bopo:'ㄕㄤ'},{char:'下',bopo:'ㄒㄧㄚ'},
+    {char:'中',bopo:'ㄓㄨㄥ'},{char:'人',bopo:'ㄖㄣ'},{char:'口',bopo:'ㄎㄡ'},{char:'手',bopo:'ㄕㄡ'},
+    {char:'目',bopo:'ㄇㄨ'},{char:'耳',bopo:'ㄦ'},{char:'日',bopo:'ㄖ'},{char:'月',bopo:'ㄩㄝ'},
+    {char:'火',bopo:'ㄏㄨㄛ'},{char:'水',bopo:'ㄕㄨㄟ'},{char:'木',bopo:'ㄇㄨ'},{char:'山',bopo:'ㄕㄢ'},
+    {char:'石',bopo:'ㄕ'},{char:'田',bopo:'ㄊㄧㄢ'},{char:'天',bopo:'ㄊㄧㄢ'},{char:'雨',bopo:'ㄩ'},
+    {char:'花',bopo:'ㄏㄨㄚ'},{char:'草',bopo:'ㄘㄠ'},{char:'牛',bopo:'ㄋㄧㄡ'},{char:'羊',bopo:'ㄧㄤ'},
+    {char:'馬',bopo:'ㄇㄚ'},{char:'魚',bopo:'ㄩ'},{char:'鳥',bopo:'ㄋㄧㄠ'},{char:'土',bopo:'ㄊㄨ'},
+    {char:'白',bopo:'ㄅㄞ'},{char:'心',bopo:'ㄒㄧㄣ'},{char:'門',bopo:'ㄇㄣ'},{char:'果',bopo:'ㄍㄨㄛ'}
+  ],
+  g2: [
+    {char:'朋',bopo:'ㄆㄥ'},{char:'友',bopo:'ㄧㄡ'},{char:'學',bopo:'ㄒㄩㄝ'},{char:'校',bopo:'ㄒㄧㄠ'},
+    {char:'老',bopo:'ㄌㄠ'},{char:'師',bopo:'ㄕ'},{char:'家',bopo:'ㄐㄧㄚ'},{char:'國',bopo:'ㄍㄨㄛ'},
+    {char:'書',bopo:'ㄕㄨ'},{char:'寫',bopo:'ㄒㄧㄝ'},{char:'讀',bopo:'ㄉㄨ'},{char:'聽',bopo:'ㄊㄧㄥ'},
+    {char:'說',bopo:'ㄕㄨㄛ'},{char:'走',bopo:'ㄗㄡ'},{char:'跑',bopo:'ㄆㄠ'},{char:'飛',bopo:'ㄈㄟ'},
+    {char:'笑',bopo:'ㄒㄧㄠ'},{char:'哭',bopo:'ㄎㄨ'},{char:'愛',bopo:'ㄞ'},{char:'想',bopo:'ㄒㄧㄤ'},
+    {char:'風',bopo:'ㄈㄥ'},{char:'雲',bopo:'ㄩㄣ'},{char:'星',bopo:'ㄒㄧㄥ'},{char:'春',bopo:'ㄔㄨㄣ'},
+    {char:'秋',bopo:'ㄑㄧㄡ'},{char:'冬',bopo:'ㄉㄨㄥ'},{char:'早',bopo:'ㄗㄠ'},{char:'晚',bopo:'ㄨㄢ'},
+    {char:'飯',bopo:'ㄈㄢ'},{char:'茶',bopo:'ㄔㄚ'},{char:'車',bopo:'ㄔㄜ'},{char:'船',bopo:'ㄔㄨㄢ'}
+  ]
+};
+
+/* ===== 認字讀音：看字選注音 ===== */
+function renderReadChar() {
+  const bank = CHARS[game.level.charset] || CHARS.g1;
+  const it = freshPick(bank, x => x.char);
+  const pool = [...new Set(bank.filter(x => x.bopo !== it.bopo).map(x => x.bopo))];
+  const opts = shuffle([it.bopo, ...shuffle(pool).slice(0, 3)]);
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question">
+      <div class="prompt">這個字怎麼念？</div>
+      <div class="big-display" style="font-size:96px; color:var(--red);">${it.char}</div>
+      <button class="speak-btn" style="width:70px; height:70px; font-size:30px;" onclick="speak('${it.char}')">🔊</button>
+    </div>
+    <div class="options" style="grid-template-columns:1fr 1fr; max-width:440px; margin:0 auto;">
+      ${opts.map(o => `<button class="option-btn" style="font-size:34px;" data-val="${o}" onclick="checkGeneric(this, '${o}', '${it.bopo}', '${it.char} 念 ${it.bopo}', '${it.char}', '答對了！🎉', '正確是 ${it.bopo}')">${o}</button>`).join('')}
+    </div>`;
+  setTimeout(() => speak(it.char), 400);
+}
+
+/* ===== 聽音認字：聽音選國字 ===== */
+function renderListenChar() {
+  const bank = CHARS[game.level.charset] || CHARS.g1;
+  const it = freshPick(bank, x => x.char);
+  const distract = shuffle(bank.filter(x => x.char !== it.char)).slice(0, 3).map(x => x.char);
+  const opts = shuffle([it.char, ...distract]);
+  document.getElementById('gameContent').innerHTML = `
+    <div class="question">
+      <div class="prompt">聽聽看是哪個字？</div>
+      <button class="speak-btn" style="width:80px; height:80px; font-size:36px;" onclick="speak('${it.char}')">🔊</button>
+      <div style="margin-top:6px; color:var(--brown); font-size:14px;">點喇叭聽聲音</div>
+    </div>
+    <div class="options" style="grid-template-columns:1fr 1fr; max-width:440px; margin:0 auto;">
+      ${opts.map(o => `<button class="option-btn" style="font-size:48px; padding:18px 10px;" data-val="${o}" onclick="checkGeneric(this, '${o}', '${it.char}', '${it.char}（${it.bopo}）', '${it.char}', '答對了！🎉', '正確是 ${it.char}')">${o}</button>`).join('')}
+    </div>`;
+  setTimeout(() => speak(it.char), 400);
+}
+
 /* ===== 結算 ===== */
 function finishLevel() {
+
 
 
 
